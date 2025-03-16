@@ -1,3 +1,13 @@
+@import "tailwindcss";
+
+@theme{
+  --color-olive: #557140;
+  --color-steelblue: #6194b3;
+  --color-babyblue: #c4e3f5;
+  --color-darkblue: #23465a;
+}
+
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -11,4 +21,23 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar Styling */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px; /* Decrease thickness */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e0e0e0; /* Light gray background */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #6194b3; /* Steel blue scrollbar */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #23465a; /* Darker blue on hover */
 }
