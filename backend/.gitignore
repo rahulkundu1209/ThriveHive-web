@@ -1,0 +1,8 @@
+# Node modules (dependencies)
+node_modules/
+
+# Environment variables (secrets)
+.env
+
+# Firebase service account JSON (if stored separately)
+config/firebase-service-account.json
