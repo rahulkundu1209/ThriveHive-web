@@ -8,18 +8,18 @@ const worksheetContent= {
   endDate: "18-03-2025",
   description: "Often the problem we are unable to manage our time is not that there is too much work but that we don’t know the efficient process in place so that we can learn or do things faster while extracting more impact as well as personal growth.",
   sections: [
-    {
-      title: "Reflection on Session",
-      type: "paragraphs",
-      description: "Understanding your current perspective and key takeaways from the session. To be done at Day 1.",
-      questions:[
-        "Out of all the things we talked about learning how to learn strategies, which ones have you tried already?",
-        "What questions arise in your mind after you understand the strategies on learning?",
-        "Was there an ‘aha’ moment during the session that resonated with you?",
-        "Were there any parts of the session that felt unhelpful or unclear?",
-        "Summarize your key learning from the session in a few sentences."
-      ]
-    },
+    // {
+    //   title: "Reflection on Session",
+    //   type: "paragraphs",
+    //   description: "Understanding your current perspective and key takeaways from the session. To be done at Day 1.",
+    //   questions:[
+    //     "Out of all the things we talked about learning how to learn strategies, which ones have you tried already?",
+    //     "What questions arise in your mind after you understand the strategies on learning?",
+    //     "Was there an ‘aha’ moment during the session that resonated with you?",
+    //     "Were there any parts of the session that felt unhelpful or unclear?",
+    //     "Summarize your key learning from the session in a few sentences."
+    //   ]
+    // },
     {
       title: "Food and Information",
       type: "table",
@@ -84,7 +84,7 @@ const worksheetContent= {
 
 const SectionCard = ({index, content}) => {
   const {title, type, questions, description, times} = content;
-  console.log(index, title, type, questions);
+  // console.log(index, title, type, questions);
   const [isOpen, setIsOpen] = useState(false);
   return(
     <div className='m-4'>

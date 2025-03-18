@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DatePicker from './DatePicker';
 
 const ParagraphInput = ({questions}) => {
-  console.log(questions);
+  // console.log(questions);
   return (
     <form className='p-4'>
       <div className='flex flex-col p-2'>
@@ -122,7 +122,7 @@ const TableInput = ({questions, times}) => {
 )}
 
 const SectionInput = ({type, questions, times, description}) => {
-  console.log(type, questions)
+  // console.log(type, questions)
   return (
     <div>
       <div className='p-4'>

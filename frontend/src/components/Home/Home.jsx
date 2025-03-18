@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext } from 'react';
+import { useAuthContext } from '../../App';
 
 const Home = () => {
   return (
