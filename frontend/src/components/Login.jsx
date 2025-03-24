@@ -80,7 +80,7 @@ const Login = () => {
         </div>
       ) : (
         <button 
-          className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600"
+          className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 hover:cursor-pointer"
           onClick={handleGoogleSignIn}
         >
           Sign In

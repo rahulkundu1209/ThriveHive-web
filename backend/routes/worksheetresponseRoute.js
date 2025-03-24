@@ -88,27 +88,25 @@ router.get('/view', async (req, res) => {
 
     const tableName = `response_${section_id}`;
 
-    if(isAdmin){
-      const getResponsesQuery = `SELECT * FROM ${tableName};`;
-      const responsesResult = await pool.query(getResponsesQuery);
+    // if(isAdmin){
+    //   const getResponsesQuery = `SELECT * FROM ${tableName};`;
+    //   const responsesResult = await pool.query(getResponsesQuery);
 
-      return res.json({ 
-        success: true, 
-        user: { name, email },
-        responses: responsesResult.rows 
-      });
-    }
+    //   return res.json({ 
+    //     success: true, 
+    //     user: { name, email },
+    //     responses: responsesResult.rows 
+    //   });
+    // }
 
-    if(!isAdmin){
-      const getResponsesQuery = `SELECT * FROM ${tableName} WHERE uid = $1;`;
-      const responsesResult = await pool.query(getResponsesQuery, [userId]);
-      // console.log(responsesResult.rows);
-
-      return res.json({ 
-        success: true,
-        responses: responsesResult.rows 
-      });
-    }
+    
+    const getResponsesQuery = `SELECT * FROM ${tableName} WHERE uid = $1;`;
+    const responsesResult = await pool.query(getResponsesQuery, [userId]);
+    // console.log(responsesResult.rows);
+    return res.json({ 
+      success: true,
+      responses: responsesResult.rows 
+    });
     
   } catch (error) {
     console.error('Error fetching responses:', error);

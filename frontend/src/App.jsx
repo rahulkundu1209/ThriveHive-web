@@ -23,8 +23,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/worksheet" element={<Worksheet />} />
-          {isAdmin && <Route path="/worksheet-submissions" element={<ViewWorksheetSubmissions />} />}
-          {!isAdmin && <Route path="/worksheet-submissions" element={<Submissions />} />}
+          {(signedIn && isAdmin) && <Route path="/view-worksheet-submissions" element={<ViewWorksheetSubmissions />} />}
+          {signedIn && <Route path="/worksheet-submissions" element={<Submissions />} />}
         </Routes>
       </Router>
     </AuthContext.Provider>

@@ -12,9 +12,9 @@ const Navbar = ({isAdmin, signedIn}) => {
 
       {/* Navigation Links */}
       <div className="flex space-x-6 text-gray-100 font-semibold">
-        <a href="/worksheet" className="hover:text-white">Worksheet</a>
-        {signedIn && <a href="worksheet-submissions" className="hover:text-white">Submissions</a>}
-        <a href="#" className="hover:text-white">Link 3</a>
+        <a href="/worksheet" className="hover:text-babyblue"> Edit Worksheet</a>
+        {signedIn && <a href="/worksheet-submissions" className="hover:text-babyblue"> Your Submissions</a>}
+        {(signedIn && isAdmin) && <a href="/view-worksheet-submissions" className="hover:text-white">All Submissions</a>}
       </div>
 
       {/* Authentication Section */}
