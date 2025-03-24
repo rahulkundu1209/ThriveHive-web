@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react";
 
-const DatePicker = () => {
-  const [selectedDate, setSelectedDate] = useState("");
-  const dateInputRef = useRef(null); // Reference to the input
+const DateFormatter = ({date}) => {
+  // const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  
+  // const dateInputRef = useRef(null); // Reference to the input
 
   // Convert date to "DD/MMM/YYYY" format
+  console.log(date);
   const formatDate = (dateStr) => {
     if (!dateStr) return { day: "DD", month: "MM", year: "YYYY" };
     const date = new Date(dateStr);
@@ -15,23 +17,23 @@ const DatePicker = () => {
     };
   };
 
-  const formatted = formatDate(selectedDate);
+  const formatted = formatDate(date);
 
   return (
     <div className="flex flex-col items-center space-y-1">
       {/* Hidden Date Input (Now properly clickable) */}
-      <input
+      {/* <input
         type="date"
         ref={dateInputRef}
         value={selectedDate}
         onChange={(e) => setSelectedDate(e.target.value)}
         className="opacity-0 cursor-pointer hidden"
-      />
+      /> */}
 
       {/* Clickable Date Display */}
       <div
-        className="flex flex-col items-center p-2 border rounded-md cursor-pointer"
-        onClick={() => dateInputRef.current?.showPicker()} // Ensure picker opens
+        className="flex flex-col items-center p-2 border rounded-md"
+        // onClick={() => dateInputRef.current?.showPicker()} // Ensure picker opens
       >
         <span className="text-xl font-bold">{formatted.day}</span>
         <span className="text-md">{formatted.month}</span>
@@ -41,4 +43,4 @@ const DatePicker = () => {
   );
 };
 
-export default DatePicker;
+export default DateFormatter;

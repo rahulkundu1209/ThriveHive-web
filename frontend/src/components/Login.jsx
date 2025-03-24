@@ -6,14 +6,20 @@ import { useAuthContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const Login = () => {
-  const [signedIn, setSignedIn] = useAuthContext(); // Global Auth state
-  const [showSignOut, setShowSignOut] = useState(false);
+  const {signedIn, setSignedIn, isAdmin, setIsAdmin, userName, setUserName} = useAuthContext(); // Global Auth state
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setSignedIn(true);
+
+        const idToken = await user.getIdToken(); // Get Firebase ID Token
+        const response = await axios.post("http://localhost:5000/api/auth/google", { token: idToken });
+        // console.log("Backend Response:", response.data);
+        setIsAdmin(response.data.isAdmin);
+        setUserName(response.data.name);
       } else {
         setSignedIn(false);
       }
@@ -25,16 +31,15 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken(); // Get Firebase ID Token
+      await signInWithPopup(auth, provider);
+      
 
       // Send token to the backend
-      const response = await axios.post("http://localhost:5000/api/auth/google", { token: idToken });
+      
 
-      console.log("Backend Response:", response.data);
+      // console.log("Backend Response:", response.data);
 
       setSignedIn(true); // Update Auth Context
-
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
@@ -55,14 +60,17 @@ const Login = () => {
           {/* Profile Icon */}
           <UserCircleIcon
             className="h-10 w-10 text-white bg-white/20 p-1 rounded-full cursor-pointer"
-            onClick={() => setShowSignOut(!showSignOut)}
+            onClick={() => setShowProfile(!showProfile)}
           />
 
           {/* Sign Out Dropdown */}
-          {showSignOut && (
-            <div className="absolute right-0 mt-2 w-32 bg-white text-black rounded-lg shadow-lg py-2">
+          {showProfile && (
+            <div className="absolute inline right-0 mt-2 w-32 bg-white text-black rounded-lg shadow-lg py-2">
+              <div className="text-center font-semibold text-lg">Hello, {userName}! 🌝</div>
+              {isAdmin && <div className="text-center font-semibold text-lg">You have admin access!</div>}
+              <hr />
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+                className="block w-full text-left px-4 py-2 hover:bg-gray-200 hover:cursor-pointer"
                 onClick={handleSignOut}
               >
                 Sign Out

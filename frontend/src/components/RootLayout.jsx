@@ -1,14 +1,17 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import { useAuthContext } from '../App';
 
 const RootLayout = () => {
+  const { signedIn, isAdmin, userName } = useAuthContext();
+
   return (
     <div>
-      <header>
-        <Navbar/>
+      <header className='mb-10'>
+      <Navbar signedIn={signedIn} isAdmin={isAdmin} userName={userName} />
       </header>
-      <main className='top-10 relative'>
+      <main>
         <Outlet/>
       </main>
     </div>

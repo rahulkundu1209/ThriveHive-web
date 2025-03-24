@@ -41,3 +41,7 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #23465a; /* Darker blue on hover */
 }
+
+input[type="date"] {
+  appearance: auto;
+}
