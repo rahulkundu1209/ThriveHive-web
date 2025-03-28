@@ -38,7 +38,9 @@ const ParagraphInput = ({questions}) => {
 }
 
 const TableInput = ({section_id, questions, times}) => {
+  // console.log(questions);
   // console.log(section_id);
+  // console.log(times)
   const currentDate = new Date().toISOString().split("T")[0];
   const {signedIn} = useAuthContext();
   const [dayCount, setDayCount] = useState(1);
@@ -47,6 +49,7 @@ const TableInput = ({section_id, questions, times}) => {
   const [incompleteResponse, setIncompleteResponse] = useState(false);
 
   const handleUserInput = (e, q_id, time) => {
+    e.preventDefault();
     const value = e.target.value;
     // console.log(q_id, time, value);
     setUserInput(prevState => ({
@@ -56,7 +59,7 @@ const TableInput = ({section_id, questions, times}) => {
       [time]: value
       }
     }));
-    // console.log(userInput);
+    console.log(userInput);
   }
 
   const handleSubmission = async (e) => {
@@ -70,6 +73,7 @@ const TableInput = ({section_id, questions, times}) => {
     questions.forEach((question) => {
       times.forEach((time) => {
         if (!userInput[question.q_id] || !userInput[question.q_id][time]) {
+          console.log("No input for: ", question.q_id, " ", time);
           allFieldsFilled = false;
         }
       });
@@ -109,8 +113,7 @@ const TableInput = ({section_id, questions, times}) => {
   
   return(
     <div className='p-4'>
-    {[...Array(dayCount)].map((_, dayIndex) => (
-    <form key={dayIndex} className='mb-4'>
+    <form className='mb-4'>
       <div className="overflow-x-auto pb-4">
         <div className="overflow-x-scroll custom-scrollbar">
           <table className="table-auto w-full border-collapse">
@@ -189,7 +192,6 @@ const TableInput = ({section_id, questions, times}) => {
         </button>
       </div>
     </form>
-    ))}
     {/* <button
       className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer r-0 m-4'
       onClick={dayCount < 5 ? () => setDayCount(dayCount + 1) : () => {}}
@@ -200,6 +202,7 @@ const TableInput = ({section_id, questions, times}) => {
 )}
 
 const SectionInput = ({content}) => {
+  console.log(content);
   const {section_id, type, questions, times} = content;
   // console.log(type, questions)
   return (

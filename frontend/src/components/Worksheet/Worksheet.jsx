@@ -110,7 +110,7 @@ const Worksheet = () => {
   // console.log(worksheetContent.sections);
   return (
     <div className='space-y-4'>
-      <div>
+      {/* <div>
         <h2 className='text-4xl'>{worksheetContent.title}</h2>
       </div>
       <div>
@@ -130,7 +130,7 @@ const Worksheet = () => {
           <p className='font-bold'>Description:</p> 
           {worksheetContent.description}
         </span>
-      </div>
+      </div> */}
       <div>
         <ul>
         {worksheetContent.sections?.map((section, index) => (

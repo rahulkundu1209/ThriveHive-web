@@ -66,7 +66,12 @@ const Login = () => {
           {/* Sign Out Dropdown */}
           {showProfile && (
             <div className="absolute inline right-0 mt-2 w-32 bg-white text-black rounded-lg shadow-lg py-2">
-              <div className="text-center font-semibold text-lg">Hello, {userName}! 🌝</div>
+              <div className="text-center font-semibold text-lg flex"> 
+                <p>
+                  Hello, {userName}! 🌝
+                </p>
+                {/* <img src={moonEmoji} alt="emoji" width="25px" height="25px" />  */}
+              </div>
               {isAdmin && <div className="text-center font-semibold text-lg">You have admin access!</div>}
               <hr />
               <button

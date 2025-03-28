@@ -117,6 +117,7 @@ const SectionView = ({content}) => {
   const {section_id, type, questions, times} = content;
   const [loading, setLoading] = useState(false);
   const [responses, setResponses] = useState([]);
+  const [error, setError] = useState();
 
   useEffect(() => {
     const fetchResponses = async () => {

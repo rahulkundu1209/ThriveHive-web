@@ -9,7 +9,7 @@ router.post("/google", async (req, res) => {
   try {
     // Verify the token
     const decodedToken = await admin.auth().verifyIdToken(token);
-    console.log("Decoded Token:", decodedToken);
+    // console.log("Decoded Token:", decodedToken);
 
     // Extract user info
     const { uid, email, name, picture } = decodedToken;

@@ -6,7 +6,7 @@ const DateFormatter = ({date}) => {
   // const dateInputRef = useRef(null); // Reference to the input
 
   // Convert date to "DD/MMM/YYYY" format
-  console.log(date);
+  // console.log(date);
   const formatDate = (dateStr) => {
     if (!dateStr) return { day: "DD", month: "MM", year: "YYYY" };
     const date = new Date(dateStr);
