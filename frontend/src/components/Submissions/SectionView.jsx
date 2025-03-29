@@ -151,8 +151,13 @@ const SectionView = ({content}) => {
     {loading ? 
     <p>Loading...</p> :
     <div>
-      {type == "table" && <TableView section_id={section_id} questions={questions} times={times} responses={responses}/>}
-    </div>}
+      {responses === null || responses.length === 0 ?
+      <p>You have no submissions yet!</p> :
+      <div>
+        {type == "table" && <TableView section_id={section_id} questions={questions} times={times} responses={responses}/>}
+      </div>}
+    </div>
+    }
     </>
   )
 }

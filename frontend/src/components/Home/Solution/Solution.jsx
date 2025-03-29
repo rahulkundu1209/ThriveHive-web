@@ -75,10 +75,12 @@ const FeaturesSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            Imagine waking up knowing exactly what to do next—<br />
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 px-3 py-1 rounded-lg shadow-lg text-white font-semibold">
-              No confusion, no more self-doubts, just clarity and confidence.
+            Imagine a space where you can be fearless, where people trust in your abilities and support you.<br />
+            A space that provides core <strong> life skills</strong> — <br/>
+            <span className="bg-gradient-to-r from-blue-400 to-blue-600 px-3 py-1 rounded-lg shadow-lg text-white font-semibold leading-10 mr-3">
+              time management, learning how to learn, decision-making, and more
             </span>
+            — that school never taught but that are essential for success.
           </motion.p>
 
           <motion.p 
@@ -87,7 +89,7 @@ const FeaturesSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            DO YOU WANT TO KNOW HOW?
+            {/* DO YOU WANT TO KNOW HOW? */}
           </motion.p>
         </div>
 

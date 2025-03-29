@@ -61,13 +61,15 @@ const SuccessSection = () => {
           transition={{ duration: 1, ease: "easeOut" }} 
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            They Told You <span className="text-blue-600">Success</span> Would Follow. <br />
-            So Why Do You Feel <span className="text-blue-600">Stuck</span>?
+            You're <span className="text-blue-600">skilled</span> —or at least, you think you should be. <br />
+            But how does your degree translate into a <span className="text-blue-600">meaningful career and life</span>?
+            {/* You're skilled—or at least, you think you should be. But how does your degree translate into a meaningful career and life? */}
           </h2>
           <p className="mt-4 text-gray-700 text-lg leading-relaxed">
             They said <span className="font-semibold text-blue-500">success</span> would come after your degree. But no one prepared you 
             for the uncertainty, setbacks, and figuring out what comes next. You're not alone. 
             <span className="font-semibold text-blue-500"> Thrive Hives</span> helps you navigate life’s challenges with confidence—not just survive, but thrive.
+            {/* Imagine a space where you can be fearless, where people trust in your abilities and support you. A space that provides core life skills—time management, learning how to learn, decision-making, and more—that school never taught but that are essential for success. A place where you feel energized and ready to take action instead of procrastinating. A peer group that cheers for you and gives you space to deeply reflect on your talent, mission, and career while making a positive impact on society. That's Thrive  Hives. */}
           </p>
 
           {/* ✅ Flip Cards */}

@@ -152,7 +152,9 @@ const ViewWorksheetSubmissions = () => {
         <button 
         disabled={loading}
         onClick={fetchResponses}
-        className='p-3 mt-4 rounded-lg h-fit bg-babyblue hover:cursor-pointer'>Search</button>
+        className='p-3 mt-4 rounded-lg h-fit bg-babyblue hover:cursor-pointer'>
+          {loading ? "Loading..." : "Search"}
+        </button>
       </form>
 
       {responses.length === 0 ? (

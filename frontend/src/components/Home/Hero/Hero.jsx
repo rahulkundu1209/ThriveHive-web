@@ -21,14 +21,15 @@ const Hero = () => {
           transition={{ duration: 1, ease: "easeOut" }} 
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight">
-            They taught you <span className="text-[#3b5998]">engineering.</span>{" "}
-            But did they teach you how to <br />
-            <span className="text-[#c0392b]">engineer your life?</span>
+            You follow the path: <br/>
+            <span className="text-[#3b5998]">Get decent grades → <br/></span>
+            <span className="text-[#5179ce]">Get a degree <br /></span>
+            <span className="text-[#c0392b]">Then what?</span>
           </h1>
           <p className="mt-4 text-gray-700 text-lg">
-            You mastered formulas, circuits, and code but what about{" "}
-            <span className="font-semibold">clarity, confidence, and success?</span>
-            Thrive Hives helps you bridge the gap between knowledge and action.
+            The job market and the world are{" "}
+            <span className="font-semibold">changing fast!</span>
+            How do you make sense of it and adapt without feeling overwhelmed?
           </p>
 
           {/* Buttons */}

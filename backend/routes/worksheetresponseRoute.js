@@ -114,7 +114,7 @@ router.get('/view', async (req, res) => {
     // const responsesResult = await pool.query(getResponsesQuery, [userId]);
     // console.log(responsesResult.rows);
 
-    const supabaseResponse = await supabase.from(tableName).select();
+    const supabaseResponse = await supabase.from(tableName).select().eq('uid', userId);
 
     if(supabaseResponse.error){
       return res.status(500).json({ success: false, message: 'Internal server error' });

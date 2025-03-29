@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Login from "./Login";
+import Logo from "../assets/Logo.png"
 
 const Navbar = ({isAdmin, signedIn}) => {
 
@@ -7,7 +8,8 @@ const Navbar = ({isAdmin, signedIn}) => {
     <nav className="bg-darkblue text-white flex items-center justify-between z-10 px-6 py-3 fixed top-0 left-0 right-0">
       {/* Logo */}
       <a href="/" className="">
-        <h1 className="text-2xl font-bold">Thrive Hives</h1>
+        {/* <h1 className="text-2xl font-bold">Thrive Hives</h1> */}
+        <img src={Logo} alt="logo" height="auto" width="100px" />
       </a>
 
       {/* Navigation Links */}

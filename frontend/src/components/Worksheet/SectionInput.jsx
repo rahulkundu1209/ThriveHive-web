@@ -47,6 +47,7 @@ const TableInput = ({section_id, questions, times}) => {
   const [userInput, setUserInput] = useState({});
   const [worksheetData, setWorksheetData] = useState({});
   const [incompleteResponse, setIncompleteResponse] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleUserInput = (e, q_id, time) => {
     e.preventDefault();
@@ -64,6 +65,7 @@ const TableInput = ({section_id, questions, times}) => {
 
   const handleSubmission = async (e) => {
     e.preventDefault();
+    setSaving(true);
     if (!signedIn) {
       alert("Please sign in to save your responses!");
       return;
@@ -108,6 +110,7 @@ const TableInput = ({section_id, questions, times}) => {
       }
       console.error("There was an error saving the responses!", error.message);
     }
+    setSaving(false);
 };
 
   
@@ -187,8 +190,9 @@ const TableInput = ({section_id, questions, times}) => {
           className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
           type='submit'
           onClick={handleSubmission}
+          disabled={saving}
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>
