@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion"; 
-import heroImage from "../../../assets/hero-image.jpg"; 
+import heroImage from "../../../assets/hero-image.png"; 
 import wavePattern from "../../../assets/blue-pattern.png"; 
 
 const Hero = () => {
@@ -28,8 +28,8 @@ const Hero = () => {
           </h1>
           <p className="mt-4 text-gray-700 text-lg">
             The job market and the world are{" "}
-            <span className="font-semibold">changing fast!</span>
-            How do you make sense of it and adapt without feeling overwhelmed?
+            <span className="font-semibold">changing fast! </span>
+            How do you make sense of it and adapt to Thrive?
           </p>
 
           {/* Buttons */}
