@@ -60,7 +60,7 @@ const FeaturesSection = () => {
         {/* Left Side Text Section */}
         <div className="text-left max-w-lg">
           <motion.h3 
-            className="text-5xl font-bold text-gray-900"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900"
             style={{ fontFamily: "Aladin, system-ui" }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ const FeaturesSection = () => {
           </motion.h3>
           
           <motion.p 
-            className="mt-6 text-lg text-gray-700 leading-relaxed"
+            className="mt-6 text-base sm:text-lg text-gray-700 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -84,7 +84,7 @@ const FeaturesSection = () => {
           </motion.p>
 
           <motion.p 
-            className="mt-6 text-xl text-blue-700 font-semibold"
+            className="mt-6 text-lg sm:text-xl text-blue-700 font-semibold"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -96,11 +96,11 @@ const FeaturesSection = () => {
         {/* Right Side Feature Section */}
         <div className="flex flex-col items-center w-full">
           {/* Feature Tabs */}
-          <div className="flex space-x-6 mb-6">
+          <div className="flex flex-wrap justify-center space-x-2 sm:space-x-6 mb-6">
             {features.map((feature) => (
               <button
                 key={feature.id}
-                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-all duration-300 
+                className={`px-4 sm:px-6 py-2 sm:py-3 m-2 rounded-lg font-semibold text-sm sm:text-lg transition-all duration-300 
                   ${activeFeature.id === feature.id ? "bg-blue-600 text-white shadow-lg scale-105" 
                   : "bg-gray-300 text-gray-800 hover:bg-blue-500 hover:text-white"}`}
                 onClick={() => setActiveFeature(feature)}
@@ -117,10 +117,10 @@ const FeaturesSection = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.5 }}
-            className={`w-full md:w-[550px] bg-white rounded-xl shadow-xl overflow-hidden ${activeFeature.cardHeight}`}
+            className={`w-full sm:w-[450px] md:w-[550px] bg-white rounded-xl shadow-xl overflow-hidden ${activeFeature.cardHeight}`}
           >
-            <img src={activeFeature.image} alt={activeFeature.title} className="w-full h-[300px] object-cover" />
-            <div className="p-8">
+            <img src={activeFeature.image} alt={activeFeature.title} className="w-full h-[200px] sm:h-[300px] object-cover" />
+            <div className="p-4 sm:p-8">
               {activeFeature.content}
             </div>
           </motion.div>

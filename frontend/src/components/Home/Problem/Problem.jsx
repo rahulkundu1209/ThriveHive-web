@@ -7,7 +7,7 @@ const FlipCard = ({ frontText, backText }) => {
 
   return (
     <div 
-      className="relative w-72 h-44 cursor-pointer perspective"
+      className="relative w-60 h-35 cursor-pointer perspective"
       onClick={() => setIsFlipped(!isFlipped)}
     >
       <div className="relative w-full h-full">
@@ -73,7 +73,7 @@ const SuccessSection = () => {
           </p>
 
           {/* ✅ Flip Cards */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-8 flex gap-6 justify-center">
             <FlipCard 
               frontText={<h3 className="text-lg font-semibold">Expectation:<br/>Graduate → Get a Job → <span className="text-yellow-300">Success</span></h3>} 
               backText={<p className="text-lg">Reality: The system prepared you for <span className="text-red-500 font-bold">exams</span>, not life.</p>} 
