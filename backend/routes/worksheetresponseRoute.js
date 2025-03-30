@@ -13,7 +13,7 @@ router.post('/save', async (req, res) => {
     
     const token = req.headers.authorization.split(' ')[1];
 
-    const response = await axios.post('http://localhost:5000/api/auth/google', { token });
+    const response = await axios.post(`${process.env.BACKEND_BASEURL}/api/auth/google`, { token });
     const userId = response.data.uid;
 
     const { worksheetResponse } = req.body;
@@ -77,7 +77,7 @@ router.get('/view', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
     // Fetch user details (name & email) from Firebase authentication
-    const response = await axios.post('http://localhost:5000/api/auth/google', { token });
+    const response = await axios.post(`${process.env.BACKEND_BASEURL}/api/auth/google`, { token });
     const userId = response.data.uid;
     // const isAdmin = response.data.isAdmin;
     // const name = response.data.name;  // Extracting name
@@ -139,7 +139,7 @@ router.get('/adminview', async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    const response = await axios.post('http://localhost:5000/api/auth/google', { token });
+    const response = await axios.post(`${process.env.BACKEND_BASEURL}/api/auth/google`, { token });
     // const userId = response.data.uid;
     const isAdmin = response.data.isAdmin;
     // const name = response.data.name;
@@ -182,7 +182,7 @@ router.get('/adminview', async (req, res) => {
       const userIds = [...new Set(responses.map(response => response.uid))]; // Get unique userIds
       const users = {};
       for (const userId of userIds) {
-        const response = await axios.get('http://localhost:5000/api/auth/getname', { params: { userId } });
+        const response = await axios.get(`${process.env.BACKEND_BASEURL}/api/auth/getname`, { params: { userId } });
         users[userId] = response.data;
       }
       // console.log(users);

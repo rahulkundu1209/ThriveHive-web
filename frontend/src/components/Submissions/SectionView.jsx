@@ -124,7 +124,7 @@ const SectionView = ({content}) => {
       try {
         setLoading(true);
         const token = await auth.currentUser.getIdToken();
-        const response = await axios.get('http://localhost:5000/api/worksheetresponse/view', {
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/view`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { section_id: section_id }
         });

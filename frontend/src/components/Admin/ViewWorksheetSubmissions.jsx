@@ -24,7 +24,7 @@ const ViewWorksheetSubmissions = () => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/worksheet/sections');
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
         // console.log(response.data);
         setSections(response.data);
       } catch (error) {
@@ -74,7 +74,7 @@ const ViewWorksheetSubmissions = () => {
     try {
       setLoading(true);
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.get('http://localhost:5000/api/worksheetresponse/adminview', {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/adminview`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { ...searchParams }
       });

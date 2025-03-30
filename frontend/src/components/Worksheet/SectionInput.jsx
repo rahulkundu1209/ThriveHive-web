@@ -4,38 +4,38 @@ import { useAuthContext } from '../../App';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 
-const ParagraphInput = ({questions}) => {
-  // console.log(questions);
-  return (
-    <form className='p-4'>
-      <div className='flex flex-col p-2'>
-        {
-          questions?.map((question, index) => (
-            <div>
-            <div key={index} className='flex flex-row m-2'>
-              <p>{index + 1}.</p>
-              <p>{question}</p>
-            </div>
-            <textarea
-              className='rounded-md p-2 bg-white w-full'
-              placeholder='Your answer...'
-              rows={3}
-            />
-            </div>
-          ))
-        }
-      </div>
-      <div className='flex justify-end'>
-        <button
-          className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
-          type='submit'
-        >
-          Save
-        </button>
-      </div>
-    </form>
-  )
-}
+// const ParagraphInput = ({questions}) => {
+//   // console.log(questions);
+//   return (
+//     <form className='p-4'>
+//       <div className='flex flex-col p-2'>
+//         {
+//           questions?.map((question, index) => (
+//             <div>
+//             <div key={index} className='flex flex-row m-2'>
+//               <p>{index + 1}.</p>
+//               <p>{question}</p>
+//             </div>
+//             <textarea
+//               className='rounded-md p-2 bg-white w-full'
+//               placeholder='Your answer...'
+//               rows={3}
+//             />
+//             </div>
+//           ))
+//         }
+//       </div>
+//       <div className='flex justify-end'>
+//         <button
+//           className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
+//           type='submit'
+//         >
+//           Save
+//         </button>
+//       </div>
+//     </form>
+//   )
+// }
 
 const TableInput = ({section_id, questions, times}) => {
   // console.log(questions);
@@ -95,7 +95,7 @@ const TableInput = ({section_id, questions, times}) => {
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.post('http://localhost:5000/api/worksheetresponse/save', 
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/save`, 
         { worksheetResponse: worksheetData }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -9,7 +9,7 @@ const Submissions = () => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/worksheet/sections');
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
         console.log(response.data);
         setSections(response.data);
       } catch (error) {
