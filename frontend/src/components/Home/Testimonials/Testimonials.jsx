@@ -44,7 +44,7 @@ const testimonials = [
     text: "I'm becoming more aware of my emotions. Some days I feel confident, some days I don’t, but now I check in with myself and understand my feelings better.",
     rating: 5,
     image: PragatiDisplayPhoto,
-    linkedIn: ""
+    linkedIn: "http://www.linkedin.com/in/pragati-kumari-15105a250"
   },
   {
     name: "Ritam Biswas",
@@ -84,7 +84,7 @@ const testimonials = [
     text: "I take my studies seriously now. I worry less about what others think of me and have improved my food and sleep habits.",
     rating: 5,
     image: IshitaDisplayPhoto,
-    linkedIn: ""
+    linkedIn: "https://www.linkedin.com/in/ishita-pathak-456087321"
   },
   {
     name: "Hrisikesh Das",
