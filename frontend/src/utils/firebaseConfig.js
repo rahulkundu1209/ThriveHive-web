@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB0xIpo8jSpO8BjqXqpHs2lGzxHWCohPqQ",
-  authDomain: "thrive-hives-web.firebaseapp.com",
-  projectId: "thrive-hives-web",
-  storageBucket: "thrive-hives-web.firebasestorage.app",
-  messagingSenderId: "404012425768",
-  appId: "1:404012425768:web:5ef19565af98be7281cb1d",
-  measurementId: "G-26CZ4K57PP"
+  apiKey: process.env.VITE_REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.VITE_REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
