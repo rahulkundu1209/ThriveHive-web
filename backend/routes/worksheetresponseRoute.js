@@ -22,7 +22,7 @@ router.post('/save', async (req, res) => {
     }
 
     const { responses, date, section_id } = worksheetResponse;
-    console.log("From frontend", worksheetResponse);
+    //console.log("From frontend", worksheetResponse);
 
     // Validate section_id to prevent SQL injection
     if (!/^\d+$/.test(section_id)) {
@@ -45,7 +45,7 @@ router.post('/save', async (req, res) => {
     // const checkResponseQuery = `SELECT * FROM ${tableName} WHERE uid = $1 AND date = $2;`;
     // const checkResponseResult = await pool.query(checkResponseQuery, [userId, date]);
     const {data, error} = await supabase.from(tableName).select().eq('uid', userId).eq('date', date);
-    console.log("Data: ", data);
+    // console.log("Data: ", data);
 
     // if (checkResponseResult.rows.length > 0) {
     //   return res.status(400).json({ success: false, message: 'Response already submitted' });
@@ -59,7 +59,7 @@ router.post('/save', async (req, res) => {
     // await pool.query(insertResponseQuery, [userId, date, JSON.stringify(responses)]);
 
     const insertResponse = await supabase.from(tableName).insert({uid: userId, date: date, response: responses});
-    console.log("Error in insertion: ", insertResponse);
+    // console.log("Error in insertion: ", insertResponse);
 
     return res.json({ success: true });
   } catch (error) {
@@ -150,7 +150,7 @@ router.get('/adminview', async (req, res) => {
     }
 
     const { studentName, startDate, endDate, sectionId } = req.query;
-    console.log(req.query);
+    // console.log(req.query);
     if (!studentName || !startDate || !endDate || !sectionId) {
       return res.status(400).json({ success: false, message: 'Invalid request body' });
     }
@@ -171,7 +171,7 @@ router.get('/adminview', async (req, res) => {
         .gte('date', startDate)
         .lte('date', endDate);
 
-      console.log(responsesResult);
+      // console.log(responsesResult);
       if (error) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
       }
