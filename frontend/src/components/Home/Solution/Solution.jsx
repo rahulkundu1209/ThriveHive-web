@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import personalImg from "../../../assets/personal.jpg";
+import personalImg from "../../../assets/Personal.jpg";
 import discoveryImg from "../../../assets/Discovery.jpg";
 import peerImg from "../../../assets/peer.jpg";
 
