@@ -30,10 +30,10 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white shadow-lg rounded-xl flex w-full max-w-4xl">
+      <div className="bg-white shadow-lg rounded-xl flex flex-col md:flex-row w-full max-w-4xl">
 
         {/* Left Section - Text Content */}
-        <div className="w-1/2 p-8 flex flex-col justify-center bg-gray-900 text-white rounded-l-xl">
+        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center bg-gray-900 text-white rounded-t-xl md:rounded-l-xl md:rounded-tr-none">
           <h2 className="text-3xl font-semibold leading-tight mb-4">
             "You’re not lost, you’re just one step away from clarity."
           </h2>
@@ -43,7 +43,7 @@ const ContactUs = () => {
         </div>
 
         {/* Right Section - Contact Form */}
-        <div className="w-1/2 p-8">
+        <div className="w-full md:w-1/2 p-8">
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
             Contact Us
           </h2>

@@ -5,7 +5,7 @@ import Logo from "../assets/Logo.png"
 const Navbar = ({isAdmin, signedIn}) => {
 
   return (
-    <nav className="bg-darkblue text-white flex items-center justify-between z-10 px-6 py-3 fixed top-0 left-0 right-0">
+    <nav className="bg-darkblue text-white flex items-center justify-between z-10 px-6 py-3 fixed top-0 left-0 right-0 h-20">
       {/* Logo */}
       <a href="/" className="">
         {/* <h1 className="text-2xl font-bold">Thrive Hives</h1> */}

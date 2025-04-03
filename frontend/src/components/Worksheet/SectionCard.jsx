@@ -6,7 +6,7 @@ const SectionCard = ({index, section_title, children}) => {
   // console.log(section_title);
   const [isOpen, setIsOpen] = useState(false);
   return(
-    <div className='m-4'>
+    <div className='m-0 md:m-4 pt-4'>
     <div className='flex flex-row justify-between bg-steelblue p-2 pl-3 pr-3 align-middle text-xl drop-shadow-md
       hover:cursor-pointer hover:bg-linear-to-tr from-steelblue to-babyblue hover:scale-101'
       onClick={() => setIsOpen(!isOpen)}>

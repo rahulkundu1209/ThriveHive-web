@@ -8,7 +8,7 @@ const RootLayout = () => {
 
   return (
     <div>
-      <header className='mb-15'>
+      <header className='mb-20'>
       <Navbar signedIn={signedIn} isAdmin={isAdmin} userName={userName} />
       </header>
       <main>
