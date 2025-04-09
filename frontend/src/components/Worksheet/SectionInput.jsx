@@ -1,53 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DateFormatter from './DateFormatter';
 import { useAuthContext } from '../../App';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 
-// const ParagraphInput = ({questions}) => {
-//   // console.log(questions);
-//   return (
-//     <form className='p-4'>
-//       <div className='flex flex-col p-2'>
-//         {
-//           questions?.map((question, index) => (
-//             <div>
-//             <div key={index} className='flex flex-row m-2'>
-//               <p>{index + 1}.</p>
-//               <p>{question}</p>
-//             </div>
-//             <textarea
-//               className='rounded-md p-2 bg-white w-full'
-//               placeholder='Your answer...'
-//               rows={3}
-//             />
-//             </div>
-//           ))
-//         }
-//       </div>
-//       <div className='flex justify-end'>
-//         <button
-//           className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
-//           type='submit'
-//         >
-//           Save
-//         </button>
-//       </div>
-//     </form>
-//   )
-// }
-
 const TableInput = ({section_id, questions, times}) => {
   // console.log(questions);
   // console.log(section_id);
   // console.log(times)
-  const currentDate = new Date().toISOString().split("T")[0];
+  const currentDate = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }).split(",")[0];
   const {signedIn} = useAuthContext();
-  const [dayCount, setDayCount] = useState(1);
   const [userInput, setUserInput] = useState({});
   const [worksheetData, setWorksheetData] = useState({});
   const [incompleteResponse, setIncompleteResponse] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() =>{
+    const fetchWorksheetData = async () => {
+      try {
+        const auth = getAuth();
+        const token = await auth.currentUser.getIdToken();
+        const response = await axios.get(
+          `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/worksheet-response/fetch-cache`,
+          {
+            params: { section_id, date: currentDate },
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        
+
+        // console.log("Response:", response.data);
+
+        if (response.data.success && response.data.data.response) {
+          setUserInput(response.data.data.response);
+        }
+      } catch (error) {
+        console.error("Error fetching worksheet data:", error.message);
+      }
+    };
+
+    fetchWorksheetData();
+  }, [])
 
   const handleUserInput = (e, q_id, time) => {
     e.preventDefault();
@@ -65,9 +59,10 @@ const TableInput = ({section_id, questions, times}) => {
 
   const handleSubmission = async (e) => {
     e.preventDefault();
-    setSaving(true);
+    setSubmitting(true);
     if (!signedIn) {
-      alert("Please sign in to save your responses!");
+      alert("Please sign in to submit your responses!");
+      setSubmitting(false);
       return;
     }
 
@@ -75,7 +70,7 @@ const TableInput = ({section_id, questions, times}) => {
     questions.forEach((question) => {
       times.forEach((time) => {
         if (!userInput[question.q_id] || !userInput[question.q_id][time]) {
-          console.log("No input for: ", question.q_id, " ", time);
+          // console.log("No input for: ", question.q_id, " ", time);
           allFieldsFilled = false;
         }
       });
@@ -84,6 +79,7 @@ const TableInput = ({section_id, questions, times}) => {
     if (!allFieldsFilled) {
       setIncompleteResponse(true);
       alert("Please fill in all the fields before submitting!");
+      setSubmitting(false);
       return;
     }
 
@@ -95,24 +91,48 @@ const TableInput = ({section_id, questions, times}) => {
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/save`, 
-        { worksheetResponse: worksheetData }, 
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/worksheet-response/submit`, 
+        { date: worksheetData.date, section_id: worksheetData.section_id, userResponses: worksheetData.responses }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       console.log("Response:", response.data);
-      alert("Responses saved successfully!");
+      alert("Responses submitted successfully!");
     } catch (error) {
       if (error.response && error.response.status === 400) {
         alert("Response already submitted.");
       } else {
-        alert("Failed to save responses. Please try again.");
+        alert("Failed to submit responses. Please try again.");
       }
+      console.error("There was an error submitting the responses!", error.message);
+    }
+    setSubmitting(false);
+};
+
+  const handleResponseSave = async (e) =>{
+    e.preventDefault();
+    setSaving(true);
+    if (!signedIn) {
+      alert("Please sign in to save your responses!");
+      setSaving(false);
+      return;
+    }
+    const worksheetData = { date: currentDate, section_id, responses: userInput };
+    try {
+      const auth = getAuth();
+      const token = await auth.currentUser.getIdToken();
+      const response = await axios.put(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/worksheet-response/save`, 
+        { date: worksheetData.date, section_id: worksheetData.section_id, userResponses: worksheetData.responses }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // console.log("Response:", response.data);
+      alert("Responses saved successfully!");
+    } catch (error) {
       console.error("There was an error saving the responses!", error.message);
     }
     setSaving(false);
-};
-
+  }
   
   return(
     <div className='p-4'>
@@ -159,6 +179,7 @@ const TableInput = ({section_id, questions, times}) => {
                     {question.input_type == "text" &&
                       (<textarea
                         required={true}
+                        value={userInput[question.q_id]?.[time] || ""}
                         onChange={(e) => handleUserInput(e, question.q_id, time)}
                         className="rounded-md p-2 bg-white w-fit"
                         placeholder="Your answer..."
@@ -169,6 +190,7 @@ const TableInput = ({section_id, questions, times}) => {
                     {question.input_type == "select" &&
                       (<select
                         required={true}
+                        value={userInput[question.q_id]?.[time] || 0}
                         onChange={(e) => handleUserInput(e, question.q_id, time)}
                         className="rounded-md p-1 bg-white w-fit"
                       >
@@ -187,34 +209,32 @@ const TableInput = ({section_id, questions, times}) => {
       </div>
       <div className='flex justify-end'>
         <button
-          className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
+          className='bg-steelblue text-white rounded-md p-2 mr-2 px-4 hover:cursor-pointer'
           type='submit'
-          onClick={handleSubmission}
+          onClick={handleResponseSave}
           disabled={saving}
         >
           {saving ? "Saving..." : "Save"}
         </button>
+        <button
+          className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer'
+          type='submit'
+          onClick={handleSubmission}
+          disabled={submitting}
+        >
+          {submitting ? "Submitting..." : "Submit"}
+        </button>
       </div>
     </form>
-    {/* <button
-      className='bg-steelblue text-white rounded-md p-2 px-4 hover:cursor-pointer r-0 m-4'
-      onClick={dayCount < 5 ? () => setDayCount(dayCount + 1) : () => {}}
-    >
-      Add Day +
-    </button> */}
     </div>
 )}
 
 const SectionInput = ({content}) => {
-  console.log(content);
+  // console.log(content);
   const {section_id, type, questions, times} = content;
   // console.log(type, questions)
   return (
     <div>
-      {/* <div className='p-4'>
-        <p className='font-bold'>Description:</p>
-        {description ? <p>{description}</p> : <p>No description available!</p>}
-      </div> */}
       {type == "paragraphs" && <ParagraphInput questions={questions}/>}
       {type == "table" && <TableInput section_id={section_id} questions={questions} times={times}/>}
     </div>

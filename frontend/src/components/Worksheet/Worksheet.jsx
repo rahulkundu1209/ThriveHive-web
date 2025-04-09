@@ -98,7 +98,7 @@ const Worksheet = () => {
     const fetchSections = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
-        console.log(response.data);
+        // console.log(response.data);
         setWorksheetContent({...worksheetContent, sections: response.data});
       } catch (error) {
         console.error('Error fetching sections:', error);
