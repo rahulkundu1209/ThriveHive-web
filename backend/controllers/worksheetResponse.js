@@ -33,6 +33,7 @@ const handleWorksheetResponseSave = async (req, res) => {
 const handleCacheWorksheetResponseFetch = async (req, res) => {
   try {
     // Check for authorization header
+    // console.log("Params", req.query);
     if (!req.headers.authorization) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -43,9 +44,9 @@ const handleCacheWorksheetResponseFetch = async (req, res) => {
     const response = await getUserInformation({ token });
     const userId = response.uid;
 
-    const { section_id, date } = req.body;
+    const { section_id, date } = req.query;
     if (!section_id || !date) {
-      return res.status(400).json({ success: false, message: 'Invalid request body' });
+      return res.status(400).json({ success: false, message: 'Invalid request query' });
     }
 
     // Fetch the worksheet response using the service function
