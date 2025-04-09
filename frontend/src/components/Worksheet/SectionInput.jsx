@@ -8,7 +8,7 @@ const TableInput = ({section_id, questions, times}) => {
   // console.log(questions);
   // console.log(section_id);
   // console.log(times)
-  const currentDate = new Date().toISOString().split("T")[0];
+  const currentDate = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }).split(",")[0];
   const {signedIn} = useAuthContext();
   const [userInput, setUserInput] = useState({});
   const [worksheetData, setWorksheetData] = useState({});
@@ -91,8 +91,8 @@ const TableInput = ({section_id, questions, times}) => {
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/submit`, 
-        { worksheetResponse: worksheetData }, 
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/worksheet-response/submit`, 
+        { date: worksheetData.date, section_id: worksheetData.section_id, userResponses: worksheetData.responses }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       

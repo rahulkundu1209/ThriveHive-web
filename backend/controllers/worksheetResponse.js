@@ -1,5 +1,5 @@
 import { getUserInformation } from "../services/userInformation.js";
-import { fetchCacheWorksheetResponse, saveWorksheetResponse } from "../services/worksheetResponse.js";
+import { deleteCacheWorksheetResponse, fetchCacheWorksheetResponse, saveWorksheetResponse, submitWorksheetResponse } from "../services/worksheetResponse.js";
 
 const handleWorksheetResponseSave = async (req, res) => {
   try {
@@ -59,7 +59,40 @@ const handleCacheWorksheetResponseFetch = async (req, res) => {
   }
 }
 
+const handleWorksheetResponseSubmit = async (req, res) =>{
+  try {
+    // Check for authorization header
+    if (!req.headers.authorization) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    console.log(req.headers);
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Verify user token and fetch user ID
+    const response = await getUserInformation({ token });
+    const userId = response.uid;
+
+    const { section_id, date, userResponses } = req.body;
+    if (!section_id || !date || !userResponses) {
+      return res.status(400).json({ success: false, message: 'Invalid request body' });
+    }
+
+    // Submit the worksheet response using the service function
+    await submitWorksheetResponse({ uid: userId, section_id, date, userResponses });
+
+    //Deleted the cache response
+    await deleteCacheWorksheetResponse({ uid: userId, section_id, date });
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error submitting response:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error: ' + error.message });
+  }
+}
+
 export { 
   handleWorksheetResponseSave,
-  handleCacheWorksheetResponseFetch
+  handleCacheWorksheetResponseFetch,
+  handleWorksheetResponseSubmit
 };
