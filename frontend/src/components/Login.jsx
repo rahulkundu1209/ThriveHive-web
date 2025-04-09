@@ -16,6 +16,7 @@ const Login = () => {
         setSignedIn(true);
 
         const idToken = await user.getIdToken(); // Get Firebase ID Token
+        console.log(idToken);
         const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`, { token: idToken });
         // console.log("Backend Response:", response.data);
         setIsAdmin(response.data.isAdmin);

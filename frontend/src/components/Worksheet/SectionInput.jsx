@@ -95,7 +95,7 @@ const TableInput = ({section_id, questions, times}) => {
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/save`, 
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheetresponse/submit`, 
         { worksheetResponse: worksheetData }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
