@@ -53,6 +53,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
 
 const fetchCacheWorksheetResponse = async ({uid, section_id, date}) => {
   try {
+    console.log("uid: ", uid, "section_id: ", section_id, "date: ", date);
     // Generate the table name dynamically based on the section_id
     const tableName = `cache_response_${section_id}`;
 

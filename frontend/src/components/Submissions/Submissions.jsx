@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import SectionCard from '../Worksheet/SectionCard';
 import SectionView from './SectionView';
+import ConsistancyCompusView from './ConsistancyCompusView';
 
 const Submissions = () => {
   const [sections, setSections] = useState(null);
@@ -31,6 +32,11 @@ const Submissions = () => {
             </SectionCard>
           </li>
         ))}
+        <li>
+          <SectionCard index={2} section_title={"Consistancy Compus"}>
+            <ConsistancyCompusView section_id={2}/>
+          </SectionCard>
+        </li>
         </ul>
     </div>
   )
