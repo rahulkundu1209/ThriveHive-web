@@ -42,7 +42,8 @@ const Navbar = ({isAdmin, signedIn}) => {
         <div className="hidden lg:flex space-x-6 text-gray-100 font-semibold">
           <a href="/worksheet" className="hover:text-babyblue"> Edit Worksheet</a>
           {signedIn && <a href="/worksheet-submissions" className="hover:text-babyblue"> Your Submissions</a>}
-          {(signedIn && isAdmin) && <a href="/view-worksheet-submissions" className="hover:text-white">All Submissions</a>}
+          {(signedIn && isAdmin) && <a href="/view-worksheet-submissions" className="hover:text-babyblue">All Submissions</a>}
+          {isAdmin && <a href="/admin-dashboard" className="hover:text-babyblue">Admin Dashboard</a>}
         </div>
 
         {/* Breadcrumb Button for Sidebar */}

@@ -78,7 +78,7 @@ const Login = () => {
               </div>
               <div className="border-gray-300 pb-2">
                 <button
-                  className="block w-full text-center p-2 rounded-xl hover:lg:bg-gray-200 hover:text-babyblue hover:cursor-pointer"
+                  className="block w-full text-center p-2 rounded-xl hover:lg:bg-gray-200 hover:text-babyblue lg:hover:text-black hover:cursor-pointer"
                   onClick={handleSignOut}
                 >
                   Sign Out
