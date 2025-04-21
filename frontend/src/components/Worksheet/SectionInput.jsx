@@ -99,7 +99,7 @@ const TableInput = ({section_id, questions, times}) => {
       console.log("Response:", response.data);
       alert("Responses submitted successfully!");
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 401) {
         alert("Response already submitted.");
       } else {
         alert("Failed to submit responses. Please try again.");

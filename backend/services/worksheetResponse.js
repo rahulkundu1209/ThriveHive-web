@@ -87,7 +87,7 @@ const submitWorksheetResponse = async ({uid, section_id, date, userResponses}) =
     const { data, error: error1 } = await supabase.from(tableName).select().eq('uid', uid).eq('date', date);
 
     if (data.length > 0) {
-      return res.status(400).json({ success: false, message: 'Response already submitted' });
+      throw { statusCode: 401, message: 'Response already submitted' };
     }
 
     // Insert the response into the table
