@@ -4,6 +4,7 @@ import { useAuthContext } from '../../App';
 import { auth } from '../../utils/firebaseConfig';
 import SectionCard from '../Worksheet/SectionCard';
 import SectionView, { TableView } from '../Submissions/SectionView';
+import { DisplayResponse } from '../Submissions/ConsistencyCompassView';
 
 const ViewWorksheetSubmissions = () => {
   const {signedIn, isAdmin} = useAuthContext();
@@ -47,9 +48,11 @@ const ViewWorksheetSubmissions = () => {
         {
           section_title: sections.find((section) => section.section_id == value)?.section_title,
           section_questions: sections.find((section) => section.section_id == value)?.questions,
-          section_times: sections.find((section) => section.section_id == value)?.times
+          section_times: sections.find((section) => section.section_id == value)?.times,
+          section_type: sections.find((section) => section.section_id == value)?.type
         }
       );
+      setResponses([]);
       // console.log(value);
       // console.log(sections?.find((section) => section.section_id == value)?.section_title);
       // console.log(sections);
@@ -93,7 +96,7 @@ const ViewWorksheetSubmissions = () => {
         const formattedResponses = Object.values(groupedResponses);
         setResponses(formattedResponses);
         // setResponses(response.data.responses);
-        console.log(formattedResponses);
+        // console.log(formattedResponses);
       } else {
         setError(response.data.message);
       }
@@ -162,7 +165,8 @@ const ViewWorksheetSubmissions = () => {
       ):(
         <div>
           <SectionCard section_title={selectedSection.section_title}>
-            {responses.map((response, index) => (
+            {selectedSection.section_type === "table" &&
+            responses.map((response, index) => (
               <div key={index}>
                 <p><span className="font-semibold">Submitted By:</span> {response.name}</p>
                 <TableView 
@@ -170,6 +174,17 @@ const ViewWorksheetSubmissions = () => {
                 times={selectedSection.section_times} 
                 responses={response.responses}
                 />
+              </div>
+            ))}
+            {selectedSection.section_type === "consistency_compass" &&
+            responses.map((response, index) => (
+              <div key={index}>
+                <p><span className="font-semibold">Submitted By:</span> {response.name}</p>
+                {response.responses.map((resp, idx) => (
+                  <DisplayResponse
+                  key={idx}
+                  response={resp}
+                  />))}
               </div>
             ))}
           </SectionCard>

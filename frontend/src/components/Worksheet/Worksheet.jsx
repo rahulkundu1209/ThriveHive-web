@@ -138,13 +138,12 @@ const Worksheet = () => {
             <SectionCard index={index+1} section_title={worksheet.section_title}>
               <SectionInput content={worksheet}/>
             </SectionCard>}
+            {worksheet.type === "consistency_compass" &&
+            <SectionCard index={index+1} section_title={worksheet.section_title}>
+              <ConsistencyCompassInput section_id={2}/>
+            </SectionCard>}
           </li>
         ))}
-        <li>
-          <SectionCard index={2} section_title={"Consistency Compass"}>
-            <ConsistencyCompassInput section_id={2}/>
-          </SectionCard>
-        </li>
         </ul>}
       </div>
     </div>

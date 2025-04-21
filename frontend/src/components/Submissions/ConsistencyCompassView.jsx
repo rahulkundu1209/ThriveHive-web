@@ -2,19 +2,19 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { auth } from '../../utils/firebaseConfig';
 
-const DisplayResponse = ({response}) =>{
-  console.log(response)
+export const DisplayResponse = ({response}) =>{
+  // console.log(response)
 
   return(
     <div className="consistancy-compus p-6 bg-babyblue rounded-lg shadow-md text-left">
-      <p className="text-gray-600 text-center mb-4">📅 Date: {response.date}</p>
+      <p className="text-gray-600 text-center mb-4">📅 Date: {response?.date}</p>
       <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🌅 Morning (Start of the Day)</h1>
       <div className="space-y-6">
         <h2 className="text-xl font-semibold text-gray-700">🧭 My Overarching Goal</h2>
         <p
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         >
-          {response.response?.Morning?.q1 || ""}
+          {response?.response?.Morning?.q1 || ""}
         </p>
         <hr className="border-black" />
         <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
@@ -36,7 +36,7 @@ const DisplayResponse = ({response}) =>{
                 type="checkbox"
                 className="form-checkbox text-blue-500"
                 id={`q2_${index + 1}`}
-                checked={response.response?.Morning?.q2?.some(item => item[`q2_${index + 1}`]) || false}
+                checked={response?.response?.Morning?.q2?.some(item => item[`q2_${index + 1}`]) || false}
               />
               <span className="text-gray-700">{task}</span>
             </label>
@@ -50,7 +50,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Morning?.q3 || ""}
+            {response?.response?.Morning?.q3 || ""}
           </p>
         </label>
         <hr className="border-black" />
@@ -59,7 +59,7 @@ const DisplayResponse = ({response}) =>{
         <p
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         >
-          {response.response?.Morning?.q4 || ""}
+          {response?.response?.Morning?.q4 || ""}
         </p>
         <hr className="border-black" />
 
@@ -70,7 +70,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Midday?.q5 || ""}
+            {response?.response?.Midday?.q5 || ""}
           </p>
         </label>
         <label className="block">
@@ -78,7 +78,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Midday?.q6 || ""}
+            {response?.response?.Midday?.q6 || ""}
           </p>
         </label>
         <hr className="border-black" />
@@ -89,7 +89,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Midday?.q7 || ""}
+            {response?.response?.Midday?.q7 || ""}
           </p>
         </label>
         <label className="block">
@@ -97,7 +97,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Midday?.q8 || ""}
+            {response?.response?.Midday?.q8 || ""}
           </p>
         </label>
         <label className="block">
@@ -105,14 +105,14 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Midday?.q9 || ""}
+            {response?.response?.Midday?.q9 || ""}
           </p>
         </label>
         <h3 className="text-lg font-semibold text-gray-700">🧪 Practice Questions (5 Qs & Your Answers)</h3>
         <p
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         >
-          {response.response?.Midday?.q10 || ""}
+          {response?.response?.Midday?.q10 || ""}
         </p>
         <hr className="border-black" />
 
@@ -131,7 +131,7 @@ const DisplayResponse = ({response}) =>{
                 type="checkbox"
                 className="form-checkbox text-blue-500"
                 id={`q11_${index + 1}`}
-                checked={response.response?.Evening?.q11?.some(item => item[`q11_${index + 1}`]) || false}
+                checked={response?.response?.Evening?.q11?.some(item => item[`q11_${index + 1}`]) || false}
               />
               <span className="text-gray-700">{task}</span>
             </label>
@@ -145,7 +145,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Evening?.q12 || ""}  
+            {response?.response?.Evening?.q12 || ""}  
           </p>
         </label>
         <label className="block">
@@ -153,7 +153,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Evening?.q13 || ""}
+            {response?.response?.Evening?.q13 || ""}
           </p>
         </label>
         <label className="block">
@@ -161,7 +161,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Evening?.q14 || ""}
+            {response?.response?.Evening?.q14 || ""}
           </p>
         </label>
         <label className="block">
@@ -169,7 +169,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Evening?.q15 || ""}
+            {response?.response?.Evening?.q15 || ""}
           </p>
         </label>
         <label className="block">
@@ -177,7 +177,7 @@ const DisplayResponse = ({response}) =>{
           <p
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            {response.response?.Evening?.q16 || ""}
+            {response?.response?.Evening?.q16 || ""}
           </p>
         </label>
       </div>
@@ -214,7 +214,7 @@ const ConsistencyCompassView = ({ section_id }) => {
           });
           setDates(dates);
 
-          console.log(response.data.responses);
+          // console.log(response.data.responses);
         } else {
           setError(response.data.message);
         }
@@ -245,7 +245,7 @@ const ConsistencyCompassView = ({ section_id }) => {
                   className="rounded-md p-1 bg-white"
                   onChange={(e) => {
                     setSelectedDate({ value: e.target.value, index: e.target.selectedIndex - 1 });
-                    console.log({ value: e.target.value, index: e.target.selectedIndex - 1 })
+                    // console.log({ value: e.target.value, index: e.target.selectedIndex - 1 })
                   }}
                 >
                   <option key={-1} value="All">All</option>

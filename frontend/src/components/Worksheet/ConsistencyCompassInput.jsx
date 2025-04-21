@@ -117,7 +117,7 @@ const ConsistencyCompassInput = ({section_id}) => {
           }
         );
         
-        console.log("Response:", response.data);
+        // console.log("Response:", response.data);
   
         if (response.data.success && response.data.data.response) {
           setUserInput(response.data.data.response);
@@ -201,7 +201,7 @@ const ConsistencyCompassInput = ({section_id}) => {
 
     // Construct worksheetData directly
     const worksheetData = { date: currentDate, section_id: 2, responses: userInput };
-    console.log(worksheetData);
+    // console.log(worksheetData);
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
@@ -210,7 +210,7 @@ const ConsistencyCompassInput = ({section_id}) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      console.log("Response:", response.data);
+      // console.log("Response:", response.data);
       alert("Responses submitted successfully!");
     } catch (error) {
       if (error.response && error.response.status === 401) {

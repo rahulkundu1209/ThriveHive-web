@@ -14,7 +14,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
       .eq('date', date)
       .single();
     
-      console.log("SelectError: ", selectError, "ExistingRow: ", existingRow);
+      // console.log("SelectError: ", selectError, "ExistingRow: ", existingRow);
 
     // Handle any errors that occur while fetching the existing row
     if (selectError && selectError.code !== 'PGRST116') {
@@ -53,7 +53,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
 
 const fetchCacheWorksheetResponse = async ({uid, section_id, date}) => {
   try {
-    console.log("uid: ", uid, "section_id: ", section_id, "date: ", date);
+    // console.log("uid: ", uid, "section_id: ", section_id, "date: ", date);
     // Generate the table name dynamically based on the section_id
     const tableName = `cache_response_${section_id}`;
 
