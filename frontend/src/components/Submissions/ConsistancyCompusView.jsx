@@ -172,6 +172,14 @@ const DisplayResponse = ({response}) =>{
             {response.response?.Evening?.q15 || ""}
           </p>
         </label>
+        <label className="block">
+          <span className="text-gray-700">⏰ What is your screen time?</span>
+          <p
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {response.response?.Evening?.q16 || ""}
+          </p>
+        </label>
       </div>
     </div>
   )

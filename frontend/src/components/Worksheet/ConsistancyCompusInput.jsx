@@ -318,7 +318,7 @@ const ConsistancyCompusInput = ({section_id}) => {
         <h2 className="text-xl font-semibold text-gray-700">🗓️ Planned Time Blocks for Today</h2>
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          placeholder="your answer..."
+          placeholder="Example: 10–11am: Study DS Algo; 11–12pm: Class; 12–1pm: Journal, etc."
           rows="4"
           id="q4"
           onChange={(e) => handleUserInput(e, "q4", "Morning")}
@@ -369,7 +369,7 @@ const ConsistancyCompusInput = ({section_id}) => {
           <textarea
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             rows="2"
-            placeholder="your answer..."
+            placeholder="Example: Ask me questions from [topic/project] to check my grasp on it."
             id="q8"
             onChange={(e) => handleUserInput(e, "q8", "Midday")}
             value={userInput?.Midday?.q8 || ""}
@@ -390,7 +390,7 @@ const ConsistancyCompusInput = ({section_id}) => {
         <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           rows="5"
-          placeholder="your answer..."
+          placeholder="Example: 1. Q:__ A:__"
           id="q10"
           onChange={(e) => handleUserInput(e, "q10", "Midday")}
           value={userInput?.Midday?.q10 || ""}
@@ -467,7 +467,7 @@ const ConsistancyCompusInput = ({section_id}) => {
           ></textarea>
         </label>
         <label className='block'>
-          <span>What is your screen time (upload screenshot of your digital wellbeing)?</span>
+          <span>⏰ What is your screen time?</span>
           <div className='flex flex-row space-x-4'>
             <input
               type='time'
@@ -476,16 +476,6 @@ const ConsistancyCompusInput = ({section_id}) => {
               onChange={(e) => handleUserInput(e, "q16", "Evening")}
               value={userInput?.Evening?.q16 || ""}
             />
-            {/* <input
-              type="file"
-              className="w-fit mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-            />
-            <button
-              className='bg-steelblue text-white rounded-md p-2 mr-2 px-4 hover:cursor-pointer'
-              onClick={handleFileUpload}
-            >
-              Upload
-            </button> */}
           </div>
         </label>
         <div className='flex justify-end'>
