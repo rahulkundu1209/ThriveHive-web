@@ -4,9 +4,9 @@ import axios from 'axios';
 import DateFormatter from '../Worksheet/DateFormatter';
 
 export const TableView = ({section_id, questions, times, responses}) => {
-  console.log(questions);
-  console.log(responses);
-  console.log(times);
+  // console.log(questions);
+  // console.log(responses);
+  // console.log(times);
   const dates = responses?.map(response => {
     const date = new Date(response.date);
     const day = String(date.getDate()).padStart(2, '0');
@@ -28,7 +28,7 @@ export const TableView = ({section_id, questions, times, responses}) => {
             className="rounded-md p-1 bg-white"
             onChange={(e) => {
               setSelectedDate({value: e.target.value, index: e.target.selectedIndex - 1});
-              console.log({value: e.target.value, index: e.target.selectedIndex - 1})
+              // console.log({value: e.target.value, index: e.target.selectedIndex - 1})
             }}
           >
             <option key={-1} value="All">All</option>
@@ -131,7 +131,7 @@ const SectionView = ({content}) => {
   
         if (response.data.success) {
           setResponses(response.data.responses);
-          console.log(response.data.responses);
+          // console.log(response.data.responses);
         } else {
           setError(response.data.message);
         }

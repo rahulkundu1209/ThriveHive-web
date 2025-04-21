@@ -11,7 +11,7 @@ const Submissions = () => {
     const fetchSections = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
-        console.log(response.data);
+        // console.log(response.data);
         setSections(response.data);
       } catch (error) {
         console.error('Error fetching sections:', error);
@@ -27,16 +27,16 @@ const Submissions = () => {
       <ul>
         {sections?.map((section, index) => (
           <li key={index} >
+            {section.type === "table" &&
             <SectionCard index={index+1} section_title={section.section_title}>
               <SectionView content={section}/>
-            </SectionCard>
+            </SectionCard>}
+            {section.type === "consistency_compass" &&
+            <SectionCard index={index+1} section_title={section.section_title}>
+              <ConsistencyCompassView section_id={2}/>
+            </SectionCard>}
           </li>
         ))}
-        <li>
-          <SectionCard index={2} section_title={"Consistency Compass"}>
-            <ConsistencyCompassView section_id={2}/>
-          </SectionCard>
-        </li>
         </ul>
     </div>
   )

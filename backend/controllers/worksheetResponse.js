@@ -66,7 +66,7 @@ const handleWorksheetResponseSubmit = async (req, res) =>{
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    console.log(req.headers);
+    // console.log(req.headers);
     const token = req.headers.authorization.split(' ')[1];
 
     // Verify user token and fetch user ID
