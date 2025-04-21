@@ -95,7 +95,7 @@ const consistencyCompass = {
   }
 }
 
-const ConsistancyCompassInput = ({section_id}) => {
+const ConsistencyCompassInput = ({section_id}) => {
   const currentDate = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }).split(",")[0];
   const {signedIn} = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -502,4 +502,4 @@ const ConsistancyCompassInput = ({section_id}) => {
   );
 };
 
-export default ConsistancyCompassInput;
+export default ConsistencyCompassInput;
