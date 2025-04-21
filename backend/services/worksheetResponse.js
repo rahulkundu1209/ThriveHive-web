@@ -53,6 +53,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
 
 const fetchCacheWorksheetResponse = async ({uid, section_id, date}) => {
   try {
+    console.log("uid: ", uid, "section_id: ", section_id, "date: ", date);
     // Generate the table name dynamically based on the section_id
     const tableName = `cache_response_${section_id}`;
 
@@ -86,7 +87,7 @@ const submitWorksheetResponse = async ({uid, section_id, date, userResponses}) =
     const { data, error: error1 } = await supabase.from(tableName).select().eq('uid', uid).eq('date', date);
 
     if (data.length > 0) {
-      return res.status(400).json({ success: false, message: 'Response already submitted' });
+      throw { statusCode: 401, message: 'Response already submitted' };
     }
 
     // Insert the response into the table

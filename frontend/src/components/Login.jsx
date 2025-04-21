@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { auth, provider, signInWithPopup } from "../utils/firebaseConfig";
 import axios from "axios";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/solid";
 import { useAuthContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -57,32 +57,35 @@ const Login = () => {
   return (
     <div>
       {signedIn ? (
-        <div>
+        <div className="">
           {/* Profile Icon */}
           <UserCircleIcon
-            className="h-10 w-10 text-white bg-white/20 p-1 rounded-full cursor-pointer"
+            className="h-10 w-10 text-white bg-white/20 p-1 rounded-full lg:cursor-pointer"
             onClick={() => setShowProfile(!showProfile)}
           />
 
           {/* Sign Out Dropdown */}
-          {showProfile && (
-            <div className="absolute inline right-0 mt-2 w-32 bg-white text-black rounded-lg shadow-lg py-2">
-              <div className="text-center font-semibold text-lg flex"> 
+            <div className={`absolute lg:${showProfile ? 'inline' : 'hidden'} lg:right-0 right-4 mt-2 w-50 lg:bg-white lg:text-black rounded-lg lg:shadow-lg p-2`}>
+              <div className="text-center font-semibold text-lg flex border-b border-gray-300 pb-2 mb-2"> 
                 <p>
                   Hello, {userName}! 🌝
+                  <br/>
+                  {isAdmin && "You have admin access!"}
                 </p>
-                {/* <img src={moonEmoji} alt="emoji" width="25px" height="25px" />  */}
               </div>
-              {isAdmin && <div className="text-center font-semibold text-lg">You have admin access!</div>}
-              <hr />
-              <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-200 hover:cursor-pointer"
-                onClick={handleSignOut}
-              >
-                Sign Out
-              </button>
+              <div className="border-b border-gray-300 pb-2 mb-2">
+                <a href="#">Your Profile</a>
+              </div>
+              <div className="border-gray-300 pb-2">
+                <button
+                  className="block w-full text-center p-2 rounded-xl hover:lg:bg-gray-200 hover:text-babyblue lg:hover:text-black hover:cursor-pointer"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                  <ArrowRightStartOnRectangleIcon className="h-5 w-5 inline ml-2" />
+                </button>
+              </div>
             </div>
-          )}
         </div>
       ) : (
         <button 

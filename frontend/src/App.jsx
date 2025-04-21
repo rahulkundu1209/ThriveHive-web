@@ -6,6 +6,7 @@ import Home from './components/Home/Home';
 import Worksheet from './components/Worksheet/Worksheet';
 import ViewWorksheetSubmissions from './components/Admin/ViewWorksheetSubmissions';
 import Submissions from './components/Submissions/Submissions';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 const AuthContext = createContext(null);
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/worksheet" element={<Worksheet />} />
           {(signedIn && isAdmin) && <Route path="/view-worksheet-submissions" element={<ViewWorksheetSubmissions />} />}
+          {(signedIn && isAdmin) && <Route path="/admin-dashboard" element={<AdminDashboard />} />}
           {signedIn && <Route path="/worksheet-submissions" element={<Submissions />} />}
         </Routes>
       </Router>
