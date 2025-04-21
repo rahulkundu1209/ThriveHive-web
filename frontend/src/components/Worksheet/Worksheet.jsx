@@ -3,7 +3,7 @@ import SectionInput from './SectionInput';
 import { useEffect } from 'react';
 import axios from 'axios';
 import SectionCard from './SectionCard';
-import ConsistancyCompassInput from './ConsistancyCompassInput';
+import ConsistencyCompassInput from './ConsistencyCompassInput';
 
 // const worksheetContent= {
 //   title: 'Learning How to Learn',
@@ -87,10 +87,12 @@ import ConsistancyCompassInput from './ConsistancyCompassInput';
 
 const Worksheet = () => {
   const [worksheets, setWorksheets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   //Get sections from http://localhost:5000/api/worksheet and set it to worksheetContent.sections
   useEffect(() => {
     const fetchSections = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
         // console.log(response.data);
@@ -98,6 +100,7 @@ const Worksheet = () => {
       } catch (error) {
         console.error('Error fetching sections:', error);
       }
+      setLoading(false);
     };
 
     fetchSections();
@@ -127,20 +130,22 @@ const Worksheet = () => {
         </span>
       </div> */}
       <div>
+        {loading ? <p>Loading...</p> : 
         <ul>
         {worksheets?.map((worksheet, index) => (
           <li key={index} >
+            {worksheet.type === "table" &&
             <SectionCard index={index+1} section_title={worksheet.section_title}>
               <SectionInput content={worksheet}/>
-            </SectionCard>
+            </SectionCard>}
           </li>
         ))}
         <li>
-          <SectionCard index={2} section_title={"Consistancy Compass"}>
-            <ConsistancyCompassInput section_id={2}/>
+          <SectionCard index={2} section_title={"Consistency Compass"}>
+            <ConsistencyCompassInput section_id={2}/>
           </SectionCard>
         </li>
-        </ul>
+        </ul>}
       </div>
     </div>
   )
