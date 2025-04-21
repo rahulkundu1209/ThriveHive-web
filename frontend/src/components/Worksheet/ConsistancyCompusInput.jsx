@@ -476,7 +476,7 @@ const ConsistancyCompusInput = ({section_id}) => {
               onChange={(e) => handleUserInput(e, "q16", "Evening")}
               value={userInput?.Evening?.q16 || ""}
             />
-            <input
+            {/* <input
               type="file"
               className="w-fit mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
             />
@@ -485,7 +485,7 @@ const ConsistancyCompusInput = ({section_id}) => {
               onClick={handleFileUpload}
             >
               Upload
-            </button>
+            </button> */}
           </div>
         </label>
         <div className='flex justify-end'>
