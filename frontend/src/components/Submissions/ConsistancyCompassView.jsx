@@ -185,7 +185,7 @@ const DisplayResponse = ({response}) =>{
   )
 }
 
-const ConsistancyCompusView = ({ section_id }) => {
+const ConsistancyCompassView = ({ section_id }) => {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -271,4 +271,4 @@ const ConsistancyCompusView = ({ section_id }) => {
   )
 }
 
-export default ConsistancyCompusView
+export default ConsistancyCompassView

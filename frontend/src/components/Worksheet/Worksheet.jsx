@@ -3,7 +3,7 @@ import SectionInput from './SectionInput';
 import { useEffect } from 'react';
 import axios from 'axios';
 import SectionCard from './SectionCard';
-import ConsistancyCompusInput from './ConsistancyCompusInput';
+import ConsistancyCompassInput from './ConsistancyCompassInput';
 
 // const worksheetContent= {
 //   title: 'Learning How to Learn',
@@ -136,8 +136,8 @@ const Worksheet = () => {
           </li>
         ))}
         <li>
-          <SectionCard index={2} section_title={"Consistancy Compus"}>
-            <ConsistancyCompusInput section_id={2}/>
+          <SectionCard index={2} section_title={"Consistancy Compass"}>
+            <ConsistancyCompassInput section_id={2}/>
           </SectionCard>
         </li>
         </ul>

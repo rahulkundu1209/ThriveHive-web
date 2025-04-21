@@ -4,7 +4,7 @@ import { useAuthContext } from '../../App';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 
-const consistencyCompus = {
+const consistencyCompass = {
   secion_id: 2,
   section_title: "Consistency Compass",
   type: "consistency_compass",
@@ -95,7 +95,7 @@ const consistencyCompus = {
   }
 }
 
-const ConsistancyCompusInput = ({section_id}) => {
+const ConsistancyCompassInput = ({section_id}) => {
   const currentDate = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }).split(",")[0];
   const {signedIn} = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -502,4 +502,4 @@ const ConsistancyCompusInput = ({section_id}) => {
   );
 };
 
-export default ConsistancyCompusInput;
+export default ConsistancyCompassInput;
