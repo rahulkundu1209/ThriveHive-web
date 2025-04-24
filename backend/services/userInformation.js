@@ -1,9 +1,7 @@
 import admin from '../config/firebaseAdmin.js';
 
-const getUserInformation = async ({ token }) => {
+const getUserInformation = async ({ userId }) => {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    const userId = decodedToken.uid;
     const userRecord = await admin.auth().getUser(userId);
 
     return {
@@ -19,7 +17,7 @@ const getUserInformation = async ({ token }) => {
   }
 };
 
-const adminInformation = async ({ token }) => {
+const getAdminInformation = async ({ token }) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
     const userId = decodedToken.uid;
@@ -41,5 +39,5 @@ const adminInformation = async ({ token }) => {
 
 export {
   getUserInformation,
-  adminInformation
+  getAdminInformation
 };

@@ -1,4 +1,5 @@
 import supabase from "../config/db.js";
+import { getUserInformation } from "./userInformation.js";
 
 //Save responses to the database for cache
 const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => {
@@ -132,9 +133,68 @@ const deleteCacheWorksheetResponse = async ({uid, section_id, date}) => {
   }
 };
 
+const adminFetchWorksheetResponse = async ({userId, sectionId, startDate, endDate}) => {
+  try {
+    // console.log("Params", userId, sectionId, startDate, endDate);
+    // Generate the table name dynamically based on the section_id
+    const tableName = `response_${sectionId}`;
+
+    // Fetch the response for the given userId and date from the table
+    let responsesResult;
+    if (userId === "All" || userId === "") {
+      const { data, error } = await supabase
+      .from(tableName)
+      .select()
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+      if (error) {
+      throw new Error(`Error fetching responses: ${error.message}`);
+      }
+      responsesResult = data;
+    } else {
+      const { data, error } = await supabase
+      .from(tableName)
+      .select()
+      .eq('uid', userId)
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+      if (error) {
+      throw new Error(`Error fetching responses: ${error.message}`);
+      }
+      responsesResult = data;
+    }
+    // console.log("Responses: ", responsesResult);
+
+    // Fetch user details (name and email) for each unique user ID
+    const userIds = [...new Set(responsesResult.map(response => response.uid))];
+    const users = {};
+    for (const uid of userIds) {
+      const response = await getUserInformation({ userId: uid });
+      users[uid] = response;
+    }
+
+    // Add user details to the responses
+    const responses = responsesResult.map(response => ({
+      ...response,
+      name: users[response.uid]?.displayName || null,
+      email: users[response.uid]?.email || null,
+    }));
+    // console.log("Responses with user details: ", responses);
+
+    return responses;
+  } catch (error) {
+    // Log and rethrow any errors that occur during the process
+    console.error(`Failed to fetch worksheet response: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   saveWorksheetResponse,
   fetchCacheWorksheetResponse,
   submitWorksheetResponse,
-  deleteCacheWorksheetResponse
+  deleteCacheWorksheetResponse,
+  adminFetchWorksheetResponse
 };
