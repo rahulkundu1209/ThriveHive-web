@@ -369,7 +369,7 @@ const ConsistencyCompassInput = ({section_id}) => {
         ></textarea>
         <hr className="border-black" />
 
-        <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
+        <h2 className="text-xl font-semibold text-gray-700">✅ Check the Finished Tasks (Make sure you do the task in the given order)</h2>
         <div className="space-y-2">
           {morningTasks.map((task, index) => (
             <label key={index} className="checkbox-container flex items-center space-x-2">
@@ -402,14 +402,9 @@ const ConsistencyCompassInput = ({section_id}) => {
         <hr className="border-black" />
 
         <h2 className="text-xl font-semibold text-gray-700">🗓️ Planned Time Blocks for Today</h2>
-        {/* <textarea
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          placeholder="Example: 10–11am: Study DS Algo; 11–12pm: Class; 12–1pm: Journal, etc."
-          rows="4"
-          id="q4"
-          onChange={(e) => handleUserInput(e, "q4", "Morning")}
-          value={userInput?.Morning?.q4 || ""}
-        ></textarea> */}
+        <p>
+          Plan your full day—from morning rituals to bedtime excluding the morning rituals and evening rituals —keeping both focus and flexibility in mind. Don't try to fill every hour; give yourself breathing space. But be intentional even with your brakes—write down when and how you’ll pause, so your time doesn’t slip into aimless wandering. This is about designing a day that keeps you gently stretched, not stressed.
+        </p>
         <div>
           {/* Here the time blocks will be displayed as checkboxes with a facility to check or uncheck those */}
           {userInput?.Morning?.q4?.map((task, index) => (
@@ -430,7 +425,7 @@ const ConsistencyCompassInput = ({section_id}) => {
         </div>
         <hr className="border-black" />
 
-        <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🔆 Midday (After Main Task)</h1>
+        <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🔆 During the Day (After Main Task)</h1>
         <h2 className="text-xl font-semibold text-gray-700">📌 About Your Main Task</h2>
         <label className="block">
           <span className="text-gray-700">🧠 What was your main task today?</span>
