@@ -4,6 +4,26 @@ import { auth } from '../../utils/firebaseConfig';
 
 export const DisplayResponse = ({response}) =>{
   // console.log(response)
+  const morningTasks = [
+    "Made your bed (5 min)",
+    "Sat on bed & visualized the day",
+    "Drank at least 1 liter of water",
+    "Walked for 5 minutes",
+    "Washed face, hands, feet, brushed teeth",
+    "Wore clean, fresh clothes",
+    "Did guided meditation/affirmation (10 min)",
+    "Did light stretching (10 min)",
+    "Read a spiritual/reflective book (10 min)",
+    "Had light breakfast (no milk tea or oily snacks)(optional)",
+  ];
+
+  const eveningTasks = [
+    "Went for a walk or did some physical movement",
+    "Ate healthy snacks (avoided oily/fried food)",
+    "Did guided meditation (15 min)",
+    "Spoke to your accountability partner",
+    "Shared your day’s summary with them",
+  ];
 
   return(
     <div className="consistancy-compus p-6 bg-babyblue rounded-lg shadow-md text-left">
@@ -19,25 +39,9 @@ export const DisplayResponse = ({response}) =>{
         <hr className="border-black" />
         <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
         <div className="space-y-2">
-          {[
-            "Made your bed (5 min)",
-            "Sat on bed & visualized the day",
-            "Drank at least 1 liter of water",
-            "Walked for 5 minutes",
-            "Washed face, hands, feet, brushed teeth",
-            "Wore clean, fresh clothes",
-            "Did guided meditation/affirmation (10 min)",
-            "Did light stretching (10 min)",
-            "Read a spiritual/reflective book (10 min)",
-            "Had light breakfast (no milk tea or oily snacks)(optional)",
-          ].map((task, index) => (
+          {morningTasks.map((task, index) => (
             <label key={index} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                className="form-checkbox text-blue-500"
-                id={`q2_${index + 1}`}
-                checked={response?.response?.Morning?.q2?.some(item => item[`q2_${index + 1}`]) || false}
-              />
+              <span>{response?.response?.Morning?.q2?.some(item => item[`q2_${index + 1}`]) ? "✅" : "❌"}</span>
               <span className="text-gray-700">{task}</span>
             </label>
           ))}
@@ -56,11 +60,23 @@ export const DisplayResponse = ({response}) =>{
         <hr className="border-black" />
 
         <h2 className="text-xl font-semibold text-gray-700">🗓️ Planned Time Blocks for Today</h2>
-        <p
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-        >
-          {response?.response?.Morning?.q4 || ""}
-        </p>
+        {Array.isArray(response?.response?.Morning?.q4) ? (
+          <div className="space-y-2">
+            {response?.response?.Morning?.q4?.map((task, index) => (
+              <label key={index} className="flex items-center space-x-2">
+                <span>{task[`q4_${index + 1}`] === true ? "✅" : "❌"}</span>
+                <span className="text-gray-700">{task.text}</span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <p
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {response?.response?.Morning?.q4 || ""}
+          </p>
+        )}
+
         <hr className="border-black" />
 
         <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🔆 Midday (After Main Task)</h1>
@@ -119,20 +135,9 @@ export const DisplayResponse = ({response}) =>{
         <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🌙 Evening (End of the Day)</h1>
         <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
         <div className="space-y-2">
-          {[
-            "Went for a walk or did some physical movement",
-            "Ate healthy snacks (avoided oily/fried food)",
-            "Did guided meditation (15 min)",
-            "Spoke to your accountability partner",
-            "Shared your day’s summary with them",
-          ].map((task, index) => (
+          {eveningTasks.map((task, index) => (
             <label key={index} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                className="form-checkbox text-blue-500"
-                id={`q11_${index + 1}`}
-                checked={response?.response?.Evening?.q11?.some(item => item[`q11_${index + 1}`]) || false}
-              />
+              <span>{response?.response?.Evening?.q11?.some(item => item[`q11_${index + 1}`]) ? "✅" : "❌"}</span>
               <span className="text-gray-700">{task}</span>
             </label>
           ))}
@@ -214,7 +219,7 @@ const ConsistencyCompassView = ({ section_id }) => {
           });
           setDates(dates);
 
-          // console.log(response.data.responses);
+          console.log(response.data.responses);
         } else {
           setError(response.data.message);
         }

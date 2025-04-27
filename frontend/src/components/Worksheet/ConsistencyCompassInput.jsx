@@ -102,6 +102,28 @@ const ConsistencyCompassInput = ({section_id}) => {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [userInput, setUserInput] = useState({});
+  const [mainTasks, setMainTasks] = useState([]);
+
+  const morningTasks = [
+    "Made your bed (5 min)",
+    "Sat on bed & visualized the day",
+    "Drank at least 1 liter of water",
+    "Walked for 5 minutes",
+    "Washed face, hands, feet, brushed teeth",
+    "Wore clean, fresh clothes",
+    "Did guided meditation/affirmation (10 min)",
+    "Did light stretching (10 min)",
+    "Read a spiritual/reflective book (10 min)",
+    "Had light breakfast (no milk tea or oily snacks)(optional)",
+  ];
+
+  const eveningTasks = [
+    "Went for a walk or did some physical movement",
+    "Ate healthy snacks (avoided oily/fried food)",
+    "Did guided meditation (15 min)",
+    "Spoke to your accountability partner",
+    "Shared your day’s summary with them",
+  ];
 
   useEffect(() =>{
     const fetchWorksheetData = async () => {
@@ -131,6 +153,60 @@ const ConsistencyCompassInput = ({section_id}) => {
     fetchWorksheetData();
   }, []);
 
+  const AddTask = () =>{
+    const [newTask, setNewTask] = useState("");
+
+    const handleAdddTask = (e) =>{
+      e.preventDefault();
+      if (!newTask.trim()) {
+        alert("Task cannot be empty!");
+        return;
+      }
+      const value = newTask.trim();
+      // setMainTasks(prevState => {
+      //   const updatedArray = prevState.filter(item => item.text !== value);
+      //   updatedArray.push({ text: value, [`q4_${updatedArray.length + 1}`]: false });
+      //   console.log("Updated Array:", updatedArray);
+      //   return updatedArray;
+      // });
+      setUserInput(prevState => {
+        const existingArray = prevState["Morning"]?.q4 || [];
+        const updatedArray = [
+          ...existingArray,
+          { text: value, [`q4_${existingArray.length + 1}`]: false },
+        ];        
+        console.log("Updated Array:", updatedArray);
+        return {
+          ...prevState,
+          ["Morning"]: {
+            ...prevState["Morning"],
+            q4: updatedArray
+          }
+        };
+        
+      });
+      setNewTask("");
+    }
+
+    return(
+      <div className="flex flex-row space-x-2">
+        <input 
+        type="text" 
+        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+        placeholder="Example: 10am - 11am: Study"
+        onChange={(e) => { e.preventDefault(); setNewTask(e.target.value); }}
+        value={newTask}
+        />
+        <button 
+        className="bg-steelblue text-white rounded-md p-2 hover:cursor-pointer"
+        onClick={handleAdddTask}
+        >
+          Add
+        </button>
+      </div>
+    )
+  }
+
   const handleUserInput = (e, q_id, time) => {
     // e.preventDefault();
     const value = e.target.value;
@@ -147,7 +223,20 @@ const ConsistencyCompassInput = ({section_id}) => {
         q2: updatedArray
         }
       };
-      } else if (q_id.startsWith("q11_")) {
+      } else if (q_id.startsWith("q4_")) {
+        // console.log("q4_", e.target.checked)
+        const existingArray = prevState[time]?.q4;
+        const updatedArray = existingArray.map(item => 
+          item[q_id] !== undefined ? { ...item, [q_id]: e.target.checked } : item
+        );
+        return {
+          ...prevState,
+          [time]: {
+            ...prevState[time],
+            q4: updatedArray
+          }
+        };
+      }else if (q_id.startsWith("q11_")) {
         // console.log("q11_", e.target.checked)
         const existingArray = prevState[time]?.q11 || [];
         const updatedArray = existingArray.filter(item => !item[q_id]);
@@ -180,28 +269,35 @@ const ConsistencyCompassInput = ({section_id}) => {
       return;
     }
 
-    // let allFieldsFilled = true;
-    // questions.forEach((question) => {
-    //   times.forEach((time) => {
-    //     if (!userInput[question.q_id] || !userInput[question.q_id][time]) {
-    //       // console.log("No input for: ", question.q_id, " ", time);
-    //       allFieldsFilled = false;
-    //     }
-    //   });
-    // });
+    const requiredFields = [
+      "Morning.q1", "Morning.q3", "Morning.q4",
+      "Midday.q5", "Midday.q6", "Midday.q7", "Midday.q8", "Midday.q9", "Midday.q10",
+      "Evening.q12", "Evening.q13", "Evening.q14", "Evening.q15", "Evening.q16"
+    ];
 
-    // if (!allFieldsFilled) {
-    //   setIncompleteResponse(true);
-    //   alert("Please fill in all the fields before submitting!");
-    //   setSubmitting(false);
-    //   return;
-    // }
+    const allFieldsFilled = requiredFields.every(field => {
+      const keys = field.split(".");
+      let value = userInput;
+      for (const key of keys) {
+      value = value?.[key];
+      if (value === undefined || value === null) {
+        return false;
+      }
+      }
+      return true;
+    });
+
+    if (!allFieldsFilled) {
+      alert("Please fill in all the required fields before submitting!");
+      setSubmitting(false);
+      return;
+    }
 
     // setIncompleteResponse(false);
 
     // Construct worksheetData directly
     const worksheetData = { date: currentDate, section_id: 2, responses: userInput };
-    // console.log(worksheetData);
+    console.log(worksheetData);
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
@@ -275,19 +371,8 @@ const ConsistencyCompassInput = ({section_id}) => {
 
         <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
         <div className="space-y-2">
-          {[
-            "Made your bed (5 min)",
-            "Sat on bed & visualized the day",
-            "Drank at least 1 liter of water",
-            "Walked for 5 minutes",
-            "Washed face, hands, feet, brushed teeth",
-            "Wore clean, fresh clothes",
-            "Did guided meditation/affirmation (10 min)",
-            "Did light stretching (10 min)",
-            "Read a spiritual/reflective book (10 min)",
-            "Had light breakfast (no milk tea or oily snacks)(optional)",
-          ].map((task, index) => (
-            <label key={index} className="flex items-center space-x-2">
+          {morningTasks.map((task, index) => (
+            <label key={index} className="checkbox-container flex items-center space-x-2">
               <input
                 type="checkbox"
                 className="form-checkbox text-blue-500"
@@ -295,7 +380,8 @@ const ConsistencyCompassInput = ({section_id}) => {
                 onChange={(e) => handleUserInput(e, `q2_${index + 1}`, "Morning")}
                 checked={userInput?.Morning?.q2?.some(item => item[`q2_${index + 1}`]) || false}
               />
-              <span className="text-gray-700">{task}</span>
+              <span className="checkmark"></span>
+              {task}
             </label>
           ))}
         </div>
@@ -316,14 +402,32 @@ const ConsistencyCompassInput = ({section_id}) => {
         <hr className="border-black" />
 
         <h2 className="text-xl font-semibold text-gray-700">🗓️ Planned Time Blocks for Today</h2>
-        <textarea
+        {/* <textarea
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           placeholder="Example: 10–11am: Study DS Algo; 11–12pm: Class; 12–1pm: Journal, etc."
           rows="4"
           id="q4"
           onChange={(e) => handleUserInput(e, "q4", "Morning")}
           value={userInput?.Morning?.q4 || ""}
-        ></textarea>
+        ></textarea> */}
+        <div>
+          {/* Here the time blocks will be displayed as checkboxes with a facility to check or uncheck those */}
+          {userInput?.Morning?.q4?.map((task, index) => (
+            <label key={index} className="checkbox-container flex items-center space-x-2">
+              <input
+                type="checkbox"
+                className="form-checkbox text-blue-500"
+                id={`q4_${index + 1}`}
+                onChange={(e) => handleUserInput(e, `q4_${index + 1}`, "Morning")}
+                checked={userInput?.Morning?.q4?.some(item => item[`q4_${index + 1}`]) || false}
+              />
+              <span className="checkmark"></span>
+              {task.text}
+            </label>
+          ))}
+          {/* input field to add a new time block */}
+          <AddTask />
+        </div>
         <hr className="border-black" />
 
         <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🔆 Midday (After Main Task)</h1>
@@ -400,14 +504,8 @@ const ConsistencyCompassInput = ({section_id}) => {
         <h1 className="text-2xl font-bold text-blue-600 mb-4 text-center">🌙 Evening (End of the Day)</h1>
         <h2 className="text-xl font-semibold text-gray-700">✅ Check Tasks (Yes/No)</h2>
         <div className="space-y-2">
-          {[
-            "Went for a walk or did some physical movement",
-            "Ate healthy snacks (avoided oily/fried food)",
-            "Did guided meditation (15 min)",
-            "Spoke to your accountability partner",
-            "Shared your day’s summary with them",
-          ].map((task, index) => (
-            <label key={index} className="flex items-center space-x-2">
+          {eveningTasks.map((task, index) => (
+            <label key={index} className="checkbox-container flex items-center space-x-2">
               <input
                 type="checkbox"
                 className="form-checkbox text-blue-500"
@@ -415,7 +513,8 @@ const ConsistencyCompassInput = ({section_id}) => {
                 onChange={(e) => handleUserInput(e, `q11_${index + 1}`, "Evening")}
                 checked={userInput?.Evening?.q11?.some(item => item[`q11_${index + 1}`]) || false}
               />
-              <span className="text-gray-700">{task}</span>
+              <span className="checkmark"></span>
+              {task}
             </label>
           ))}
         </div>
