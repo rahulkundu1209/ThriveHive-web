@@ -3,6 +3,7 @@ import SectionInput from './SectionInput';
 import { useEffect } from 'react';
 import axios from 'axios';
 import SectionCard from './SectionCard';
+import ConsistencyCompassInput from './ConsistencyCompassInput';
 
 // const worksheetContent= {
 //   title: 'Learning How to Learn',
@@ -85,24 +86,21 @@ import SectionCard from './SectionCard';
 // }
 
 const Worksheet = () => {
-  const [worksheetContent, setWorksheetContent] = useState({
-    title: 'Learning How to Learn',
-    startDate: "14-03-2025",
-    endDate: "18-03-2025",
-    description: "Often the problem we are unable to manage our time is not that there is too much work but that we don’t know the efficient process in place so that we can learn or do things faster while extracting more impact as well as personal growth.",
-    sections: []
-  });
+  const [worksheets, setWorksheets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   //Get sections from http://localhost:5000/api/worksheet and set it to worksheetContent.sections
   useEffect(() => {
     const fetchSections = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/worksheet/sections`);
-        console.log(response.data);
-        setWorksheetContent({...worksheetContent, sections: response.data});
+        // console.log(response.data);
+        setWorksheets([...worksheets, ...response.data]);
       } catch (error) {
         console.error('Error fetching sections:', error);
       }
+      setLoading(false);
     };
 
     fetchSections();
@@ -132,15 +130,21 @@ const Worksheet = () => {
         </span>
       </div> */}
       <div>
+        {loading ? <p>Loading...</p> : 
         <ul>
-        {worksheetContent.sections?.map((section, index) => (
+        {worksheets?.map((worksheet, index) => (
           <li key={index} >
-            <SectionCard index={index+1} section_title={section.section_title}>
-              <SectionInput content={section}/>
-            </SectionCard>
+            {worksheet.type === "table" &&
+            <SectionCard index={index+1} section_title={worksheet.section_title}>
+              <SectionInput content={worksheet}/>
+            </SectionCard>}
+            {worksheet.type === "consistency_compass" &&
+            <SectionCard index={index+1} section_title={worksheet.section_title}>
+              <ConsistencyCompassInput section_id={2}/>
+            </SectionCard>}
           </li>
         ))}
-        </ul>
+        </ul>}
       </div>
     </div>
   )

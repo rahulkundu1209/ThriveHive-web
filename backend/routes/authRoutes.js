@@ -9,6 +9,9 @@ router.post("/google", async (req, res) => {
   try {
     // Verify the token
     const decodedToken = await admin.auth().verifyIdToken(token);
+    if (!decodedToken) {
+      return res.status(401).json({ success: false, message: "Invalid or expired token" });
+    }
     // console.log("Decoded Token:", decodedToken);
 
     // Extract user info
