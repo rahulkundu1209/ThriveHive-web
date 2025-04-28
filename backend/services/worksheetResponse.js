@@ -1,4 +1,5 @@
 import supabase from "../config/db.js";
+import { getUserInformation } from "./userInformation.js";
 
 //Save responses to the database for cache
 const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => {
@@ -14,7 +15,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
       .eq('date', date)
       .single();
     
-      console.log("SelectError: ", selectError, "ExistingRow: ", existingRow);
+      // console.log("SelectError: ", selectError, "ExistingRow: ", existingRow);
 
     // Handle any errors that occur while fetching the existing row
     if (selectError && selectError.code !== 'PGRST116') {
@@ -53,6 +54,7 @@ const saveWorksheetResponse = async ({uid, section_id, date, userResponses}) => 
 
 const fetchCacheWorksheetResponse = async ({uid, section_id, date}) => {
   try {
+    // console.log("uid: ", uid, "section_id: ", section_id, "date: ", date);
     // Generate the table name dynamically based on the section_id
     const tableName = `cache_response_${section_id}`;
 
@@ -86,7 +88,7 @@ const submitWorksheetResponse = async ({uid, section_id, date, userResponses}) =
     const { data, error: error1 } = await supabase.from(tableName).select().eq('uid', uid).eq('date', date);
 
     if (data.length > 0) {
-      return res.status(400).json({ success: false, message: 'Response already submitted' });
+      throw { statusCode: 401, message: 'Response already submitted' };
     }
 
     // Insert the response into the table
@@ -131,9 +133,68 @@ const deleteCacheWorksheetResponse = async ({uid, section_id, date}) => {
   }
 };
 
+const adminFetchWorksheetResponse = async ({userId, sectionId, startDate, endDate}) => {
+  try {
+    // console.log("Params", userId, sectionId, startDate, endDate);
+    // Generate the table name dynamically based on the section_id
+    const tableName = `response_${sectionId}`;
+
+    // Fetch the response for the given userId and date from the table
+    let responsesResult;
+    if (userId === "All" || userId === "") {
+      const { data, error } = await supabase
+      .from(tableName)
+      .select()
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+      if (error) {
+      throw new Error(`Error fetching responses: ${error.message}`);
+      }
+      responsesResult = data;
+    } else {
+      const { data, error } = await supabase
+      .from(tableName)
+      .select()
+      .eq('uid', userId)
+      .gte('date', startDate)
+      .lte('date', endDate);
+
+      if (error) {
+      throw new Error(`Error fetching responses: ${error.message}`);
+      }
+      responsesResult = data;
+    }
+    // console.log("Responses: ", responsesResult);
+
+    // Fetch user details (name and email) for each unique user ID
+    const userIds = [...new Set(responsesResult.map(response => response.uid))];
+    const users = {};
+    for (const uid of userIds) {
+      const response = await getUserInformation({ userId: uid });
+      users[uid] = response;
+    }
+
+    // Add user details to the responses
+    const responses = responsesResult.map(response => ({
+      ...response,
+      name: users[response.uid]?.displayName || null,
+      email: users[response.uid]?.email || null,
+    }));
+    // console.log("Responses with user details: ", responses);
+
+    return responses;
+  } catch (error) {
+    // Log and rethrow any errors that occur during the process
+    console.error(`Failed to fetch worksheet response: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   saveWorksheetResponse,
   fetchCacheWorksheetResponse,
   submitWorksheetResponse,
-  deleteCacheWorksheetResponse
+  deleteCacheWorksheetResponse,
+  adminFetchWorksheetResponse
 };

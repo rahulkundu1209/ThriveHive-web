@@ -11,7 +11,7 @@ const SectionCard = ({index, section_title, children}) => {
       hover:cursor-pointer hover:bg-linear-to-tr from-steelblue to-babyblue hover:scale-101'
       onClick={() => setIsOpen(!isOpen)}>
       <div className='flex flex-row'>
-        {index && <h3 className='font-bold'>Section {index} : </h3>}
+        {index && <h3 className='font-bold'>Worksheet {index} : </h3>}
         <h3>{section_title}</h3>
       </div>
       <div className='flex flex-row '>

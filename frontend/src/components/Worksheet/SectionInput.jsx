@@ -54,7 +54,7 @@ const TableInput = ({section_id, questions, times}) => {
       [time]: value
       }
     }));
-    console.log(userInput);
+    // console.log(userInput);
   }
 
   const handleSubmission = async (e) => {
@@ -87,7 +87,7 @@ const TableInput = ({section_id, questions, times}) => {
 
     // Construct worksheetData directly
     const worksheetData = { date: currentDate, section_id, responses: userInput };
-    console.log(worksheetData);
+    // console.log(worksheetData);
     try {
       const auth = getAuth();
       const token = await auth.currentUser.getIdToken();
@@ -96,10 +96,9 @@ const TableInput = ({section_id, questions, times}) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      console.log("Response:", response.data);
       alert("Responses submitted successfully!");
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 401) {
         alert("Response already submitted.");
       } else {
         alert("Failed to submit responses. Please try again.");
