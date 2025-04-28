@@ -125,10 +125,13 @@ export const DisplayResponse = ({response}) =>{
           </p>
         </label>
         <h3 className="text-lg font-semibold text-gray-700">🧪 Practice Questions (5 Qs & Your Answers)</h3>
-        <p
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-        >
-          {response?.response?.Midday?.q10 || ""}
+        <p className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          {(response?.response?.Midday?.q10 || "").split("\n").map((line, index) => (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+          ))}
         </p>
         <hr className="border-black" />
 
@@ -175,6 +178,30 @@ export const DisplayResponse = ({response}) =>{
             className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             {response?.response?.Evening?.q15 || ""}
+          </p>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">📋 What tasks remain incomplete from today if there are any?</span>
+          <p
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {response?.response?.Evening?.q17 || ""}
+          </p>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">🔄 What tasks actually need to be carried forward for the next day in case they are not completed?</span>
+          <p
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {response?.response?.Evening?.q18 || ""}
+          </p>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">📅 What are you doing tomorrow (write 1-2 lines)?</span>
+          <p
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {response?.response?.Evening?.q19 || ""}
           </p>
         </label>
         <label className="block">
