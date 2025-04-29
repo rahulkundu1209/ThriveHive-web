@@ -1,5 +1,5 @@
 import admin from "../config/firebaseAdmin.js";
-import { adminFetchWorksheetResponse, deleteCacheWorksheetResponse, fetchCacheWorksheetResponse, saveWorksheetResponse, submitWorksheetResponse } from "../services/worksheetResponse.js";
+import { adminFetchWorksheetResponse, deleteCacheWorksheetResponse, fetchCacheWorksheetResponse, getCacheWorksheetResponseByDate, saveWorksheetResponse, submitWorksheetResponse } from "../services/worksheetResponse.js";
 import { getAdminInformation } from "../services/userInformation.js";
 
 const handleWorksheetResponseSave = async (req, res) => {
@@ -127,9 +127,40 @@ const handleadminViewWorksheetResponse = async (req, res) => {
   }
 }
 
+const handleAutomaticWorksheetResponseSubmit = async (section_id) => {
+  try{
+    const date = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }).split(',')[0]);
+    date.setDate(date.getDate() - 1); // Subtract one day
+    const formattedDate = date.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
+    // console.log("Date", formattedDate);
+    const allCacheResponses = await getCacheWorksheetResponseByDate({ section_id, date: formattedDate });
+    // console.log("All Cache Responses", allCacheResponses);
+    for (const cacheResponse of allCacheResponses) {
+      const { uid , date, response: userResponses } = cacheResponse;
+
+      if (!section_id || !date || !userResponses) {
+        throw new Error('Invalid request body');
+      }
+
+      // Submit the worksheet response using the service function
+      await submitWorksheetResponse({ uid, section_id, date, userResponses });
+
+      // Delete the cache response
+      await deleteCacheWorksheetResponse({ uid, section_id, date });
+    }
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('Error in automaticWorksheetResponseSubmit:', error.message);
+    throw error;
+  }
+}
+
 export { 
   handleWorksheetResponseSave,
   handleCacheWorksheetResponseFetch,
   handleWorksheetResponseSubmit,
   handleadminViewWorksheetResponse,
+  handleAutomaticWorksheetResponseSubmit
 };
