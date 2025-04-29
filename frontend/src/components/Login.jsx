@@ -4,43 +4,51 @@ import axios from "axios";
 import { UserCircleIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/solid";
 import { useAuthContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const {signedIn, setSignedIn, isAdmin, setIsAdmin, userName, setUserName} = useAuthContext(); // Global Auth state
+  const { signedIn, setSignedIn, isAdmin, setIsAdmin, userName, setUserName, userPhoto, setUserPhoto } = useAuthContext(); // Global Auth state
   const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setSignedIn(true);
-
         const idToken = await user.getIdToken(); // Get Firebase ID Token
-        // console.log(idToken);
-        const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`, { token: idToken });
-        // console.log("Backend Response:", response.data);
-        setIsAdmin(response.data.isAdmin);
-        setUserName(response.data.name);
+        // Check if this is a new login
+        const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+        
+        try {
+          // Send token to backend
+          const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`, { token: idToken });
+          
+          // Update state with user info
+          setSignedIn(true);
+          setIsAdmin(response.data.isAdmin);
+          setUserName(response.data.name);
+          setUserPhoto(user.photoURL); // Store user photo URL in the global state
+
+          // If it's a new user, redirect to the edit page only once
+          if (isNewUser && !localStorage.getItem('hasRedirected')) {
+            localStorage.setItem('hasRedirected', 'true');
+            navigate("/edit");
+          }
+        } catch (error) {
+          console.error("Authentication error:", error);
+        }
       } else {
         setSignedIn(false);
       }
-      // setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [signedIn]); // Debugging to check if state updates
+  }, []); // No dependency on signedIn to prevent infinite loops
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithPopup(auth, provider);
-      
-
-      // Send token to the backend
-      
-
-      // console.log("Backend Response:", response.data);
-
-      setSignedIn(true); // Update Auth Context
+      const result = await signInWithPopup(auth, provider);
+      // The redirect will happen in the useEffect when the auth state changes
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
@@ -49,53 +57,63 @@ const Login = () => {
   const handleSignOut = () => {
     auth.signOut().then(() => {
       setSignedIn(false);
+      localStorage.removeItem('hasRedirected'); // Remove the redirect flag on sign out
     }).catch(error => {
       console.error("Sign Out Error:", error);
     });
   };
 
   return (
-    <div>
-      {signedIn ? (
-        <div className="">
-          {/* Profile Icon */}
-          <UserCircleIcon
-            className="h-10 w-10 text-white bg-white/20 p-1 rounded-full lg:cursor-pointer"
-            onClick={() => setShowProfile(!showProfile)}
-          />
-
-          {/* Sign Out Dropdown */}
-            <div className={`absolute lg:${showProfile ? 'inline' : 'hidden'} lg:right-0 right-4 mt-2 w-50 lg:bg-white lg:text-black rounded-lg lg:shadow-lg p-2`}>
-              <div className="text-center font-semibold text-lg flex border-b border-gray-300 pb-2 mb-2"> 
-                <p>
-                  Hello, {userName}! 🌝
-                  <br/>
-                  {isAdmin && "You have admin access!"}
-                </p>
-              </div>
-              <div className="border-b border-gray-300 pb-2 mb-2">
-                <a href="#">Your Profile</a>
-              </div>
-              <div className="border-gray-300 pb-2">
-                <button
-                  className="block w-full text-center p-2 rounded-xl hover:lg:bg-gray-200 hover:text-babyblue lg:hover:text-black hover:cursor-pointer"
-                  onClick={handleSignOut}
-                >
-                  Sign Out
-                  <ArrowRightStartOnRectangleIcon className="h-5 w-5 inline ml-2" />
-                </button>
-              </div>
-            </div>
+    <div className="relative">
+    {signedIn ? (
+      <div className="flex items-center space-x-2">
+        {/* Profile Icon / Photo */}
+        <div onClick={() => setShowProfile(!showProfile)} className="cursor-pointer">
+          {userPhoto ? (
+            <img
+              src={userPhoto}
+              alt="User"
+              className="h-10 w-10 rounded-full border-2 border-white shadow-md hover:ring-2 hover:ring-blue-400 transition-all duration-200"
+            />
+          ) : (
+            <UserCircleIcon
+              className="h-10 w-10 text-white bg-white/20 p-1 rounded-full hover:ring-2 hover:ring-blue-400 transition-all duration-200"
+            />
+          )}
         </div>
-      ) : (
-        <button 
-          className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 hover:cursor-pointer"
-          onClick={handleGoogleSignIn}
-        >
-          Sign In
-        </button>
-      )}
-    </div>
+  
+        {/* Dropdown Menu */}
+        {showProfile && (
+          <div className="absolute right-0 top-12 w-64 bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 animate-fade-in">
+            <div className="px-4 py-3 border-b border-gray-300">
+              <p className="font-semibold text-lg">Hello, {userName}! 🌝</p>
+              {isAdmin && <p className="text-sm text-blue-500 mt-1">You have admin access!</p>}
+            </div>
+            <div className="px-4 py-2 border-b border-gray-300 hover:bg-gray-100 transition cursor-pointer">
+              <a href="/profile" className="block w-full">Your Profile</a>
+            </div>
+            <div className="px-4 py-2">
+              <button
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                onClick={handleSignOut}
+              >
+                Sign Out
+                <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    ) : (
+      <button 
+        className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+        onClick={handleGoogleSignIn}
+      >
+        Sign In with Google
+      </button>
+    )}
+  </div>
+  
   );
 };
 

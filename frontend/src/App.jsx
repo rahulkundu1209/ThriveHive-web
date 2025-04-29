@@ -16,6 +16,7 @@ function App() {
   const [signedIn, setSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(''); // Add userPhoto state
 
   return (
     <AuthContext.Provider value={{ signedIn, setSignedIn, isAdmin, setIsAdmin, userName, setUserName }}>
