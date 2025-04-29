@@ -272,7 +272,8 @@ const ConsistencyCompassInput = ({section_id}) => {
     const requiredFields = [
       "Morning.q1", "Morning.q3", "Morning.q4",
       "Midday.q5", "Midday.q6", "Midday.q7", "Midday.q8", "Midday.q9", "Midday.q10",
-      "Evening.q12", "Evening.q13", "Evening.q14", "Evening.q15", "Evening.q16"
+      "Evening.q12", "Evening.q13", "Evening.q14", "Evening.q15", "Evening.q16",
+      "Evening.q17", "Evening.q18", "Evening.q19"
     ];
 
     const allFieldsFilled = requiredFields.every(field => {
@@ -558,6 +559,39 @@ const ConsistencyCompassInput = ({section_id}) => {
             id="q15"
             onChange={(e) => handleUserInput(e, "q15", "Evening")}
             value={userInput?.Evening?.q15 || ""}
+          ></textarea>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">📋 What tasks remain incomplete from today if there are any?</span>
+          <textarea
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            rows="2"
+            placeholder="your answer..."
+            id="q17"
+            onChange={(e) => handleUserInput(e, "q17", "Evening")}
+            value={userInput?.Evening?.q17 || ""}
+          ></textarea>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">🔄 What tasks actually need to be carried forward for the next day in case they are not completed?</span>
+          <textarea
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            rows="2"
+            placeholder="your answer..."
+            id="q18"
+            onChange={(e) => handleUserInput(e, "q18", "Evening")}
+            value={userInput?.Evening?.q18 || ""}
+          ></textarea>
+        </label>
+        <label className="block">
+          <span className="text-gray-700">📅 What are you doing tomorrow (write 1-2 lines)?</span>
+          <textarea
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            rows="2"
+            placeholder="your answer..."
+            id="q19"
+            onChange={(e) => handleUserInput(e, "q19", "Evening")}
+            value={userInput?.Evening?.q19 || ""}
           ></textarea>
         </label>
         <label className='block'>
