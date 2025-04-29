@@ -191,10 +191,41 @@ const adminFetchWorksheetResponse = async ({userId, sectionId, startDate, endDat
   }
 }
 
+const getCacheWorksheetResponseByDate = async ({section_id, date}) => {
+  try {
+    // Generate the table name dynamically based on the section_id
+    const tableName = `cache_response_${section_id}`;
+
+    // Fetch the response for the given uid and date from the table
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .eq('date', date);
+
+    // console.log("Response: ", data, "Error: ", error);
+    // Handle any errors that occur while fetching the response
+    if (error && error.code !== 'PGRST116') { // PGRST116 indicates no rows found
+      throw new Error(`Error fetching response: ${error.message}`);
+    }
+
+    // Return null if no rows are found
+    if (!data) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    // Log and rethrow any errors that occur during the process
+    console.error(`Failed to fetch worksheet response: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   saveWorksheetResponse,
   fetchCacheWorksheetResponse,
   submitWorksheetResponse,
   deleteCacheWorksheetResponse,
-  adminFetchWorksheetResponse
+  adminFetchWorksheetResponse,
+  getCacheWorksheetResponseByDate
 };
