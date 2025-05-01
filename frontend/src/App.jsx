@@ -7,6 +7,8 @@ import Worksheet from './components/Worksheet/Worksheet';
 import ViewWorksheetSubmissions from './components/Admin/ViewWorksheetSubmissions';
 import Submissions from './components/Submissions/Submissions';
 import AdminDashboard from './components/Admin/AdminDashboard';
+import ProfileDisplay from './components/ProfilePage/ProfilePage';
+import ProfileEdit from './components/ProfileEdit/ProfileEdit';
 
 const AuthContext = createContext(null);
 
@@ -24,6 +26,8 @@ function App() {
         <RootLayout />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/edit" element={<ProfileEdit />} />
+          <Route path="/profile" element={<ProfileDisplay />} />
           <Route path="/worksheet" element={<Worksheet />} />
           {(signedIn && isAdmin) && <Route path="/view-worksheet-submissions" element={<ViewWorksheetSubmissions />} />}
           {(signedIn && isAdmin) && <Route path="/admin-dashboard" element={<AdminDashboard />} />}
