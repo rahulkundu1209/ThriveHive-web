@@ -7,8 +7,8 @@ const Skills = ({
   skills,
   skillInput,
   setSkillInput,
-  removeSkill,
-  handleSkillAdd
+  handleAddSkill,
+  handleRemoveSkill
 }) => {
   return (
     <motion.section 
@@ -25,7 +25,7 @@ const Skills = ({
         <div className="space-y-8">
           <div className="bg-[#FDF6F0] p-6 rounded-2xl shadow-md">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">Top Skills/Strengths</h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mb-3">
               {skills.map((skill, index) => (
                 <motion.span
                   key={index}
@@ -34,21 +34,29 @@ const Skills = ({
                 >
                   {skill}
                   <button 
-                    onClick={() => removeSkill(index)}
+                    onClick={() => handleRemoveSkill(index)}
                     className="ml-2 text-red-500 font-bold hover:text-red-700"
                   >
                     ×
                   </button>
                 </motion.span>
               ))}
+            </div>
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={handleSkillAdd}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddSkill(e)}
                 placeholder="Add a skill..."
-                className="px-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#2E8B57]"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#2E8B57]"
               />
+              <button
+                onClick={handleAddSkill}
+                className="px-4 py-2 bg-[#2E8B57] text-white rounded-full shadow hover:bg-[#1f6e4a] transition"
+              >
+                Add
+              </button>
             </div>
           </div>
 
