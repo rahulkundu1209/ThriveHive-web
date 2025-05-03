@@ -28,6 +28,7 @@ const ProfileEdit = ({ profileData = {} }) => {
   const [progress, setProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tooltip, setTooltip] = useState({ show: false, text: '', x: 0, y: 0 });
+  const [saveStatus, setSaveStatus] = useState({ message: '', isError: false });
 
   const sections = [
     'foundational', 'introduction', 'purpose', 
@@ -142,34 +143,34 @@ const ProfileEdit = ({ profileData = {} }) => {
       y: rect.top + window.scrollY - 40
     });
   };
-// Add these handler functions in your ProfileEdit component
-const handleAddSkill = (e) => {
-  e.preventDefault();
-  if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-    setSkills([...skills, skillInput.trim()]);
-    setSkillInput('');
-  }
-};
 
-const handleRemoveSkill = (index) => {
-  const newSkills = [...skills];
-  newSkills.splice(index, 1);
-  setSkills(newSkills);
-};
+  const handleAddSkill = (e) => {
+    e.preventDefault();
+    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
+      setSkills([...skills, skillInput.trim()]);
+      setSkillInput('');
+    }
+  };
 
-const handleAddInterest = (e) => {
-  e.preventDefault();
-  if (interestInput.trim() && !interests.includes(interestInput.trim())) {
-    setInterests([...interests, interestInput.trim()]);
-    setInterestInput('');
-  }
-};
+  const handleRemoveSkill = (index) => {
+    const newSkills = [...skills];
+    newSkills.splice(index, 1);
+    setSkills(newSkills);
+  };
 
-const handleRemoveInterest = (index) => {
-  const newInterests = [...interests];
-  newInterests.splice(index, 1);
-  setInterests(newInterests);
-};
+  const handleAddInterest = (e) => {
+    e.preventDefault();
+    if (interestInput.trim() && !interests.includes(interestInput.trim())) {
+      setInterests([...interests, interestInput.trim()]);
+      setInterestInput('');
+    }
+  };
+
+  const handleRemoveInterest = (index) => {
+    const newInterests = [...interests];
+    newInterests.splice(index, 1);
+    setInterests(newInterests);
+  };
 
   const navigateSection = (direction) => {
     const newSection = direction === 'next' ? currentSection + 1 : currentSection - 1;
@@ -223,20 +224,93 @@ const handleRemoveInterest = (index) => {
     }
   };
 
-  const handleCompleteProfile = () => {
+  const saveProfileToBackend = async (profileData) => {
+    try {
+      const auth = getAuth();
+      const idToken = await auth.currentUser.getIdToken();
+      
+      const response = await fetch('http://localhost:5000/api/profile/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(profileData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      throw error;
+    }
+  };
+
+  const handleCompleteProfile = async () => {
     setIsSubmitting(true);
-    setTimeout(() => navigate("/profile"), 1500);
+    setSaveStatus({ message: '', isError: false });
+    
+    try {
+      // Prepare the data to send to backend
+      const profileToSave = {
+        ...formData,
+        skills,
+        interests,
+        avatar: avatarPreview
+      };
+
+      // Save to backend
+      const response = await saveProfileToBackend(profileToSave);
+      
+      if (response.success) {
+        setSaveStatus({ message: 'Profile saved successfully!', isError: false });
+        // Clear local storage after successful save
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        
+        // Navigate after a short delay
+        setTimeout(() => navigate("/profile"), 1500);
+      } else {
+        setSaveStatus({ message: 'Failed to save profile. Please try again.', isError: true });
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setSaveStatus({ message: 'An error occurred while saving your profile.', isError: true });
+      setIsSubmitting(false);
+    }
   };
 
   const sectionComponents = [
     <Foundation key={0} {...{ formData, handleInputChange, avatarPreview, handleAvatarUpload, showTooltip }} />,
     <Self key={1} {...{ formData, handleInputChange, showTooltip }} />,
     <Purpose key={2} {...{ formData, handleInputChange, showTooltip }} />,
-    <Skills  key={3}  formData={formData}   handleInputChange={handleInputChange} skills={skills} skillInput={skillInput}  setSkillInput={setSkillInput}   handleAddSkill={handleAddSkill}   handleRemoveSkill={handleRemoveSkill} />,
+    <Skills 
+      key={3} 
+      formData={formData} 
+      handleInputChange={handleInputChange} 
+      skills={skills} 
+      skillInput={skillInput} 
+      setSkillInput={setSkillInput} 
+      handleAddSkill={handleAddSkill} 
+      handleRemoveSkill={handleRemoveSkill} 
+    />,
     <Life key={4} {...{ formData, handleInputChange }} />,
     <Dreams key={5} {...{ formData, handleInputChange }} />,
     <Reflection key={6} {...{ formData, handleInputChange }} />,
-    <Community key={7} formData={formData} handleInputChange={handleInputChange} interests={interests} setInterests={setInterests} interestInput={interestInput} setInterestInput={setInterestInput} handleAddInterest={handleAddInterest} handleRemoveInterest={handleRemoveInterest} />
+    <Community 
+      key={7} 
+      formData={formData} 
+      handleInputChange={handleInputChange} 
+      interests={interests} 
+      setInterests={setInterests} 
+      interestInput={interestInput} 
+      setInterestInput={setInterestInput} 
+      handleAddInterest={handleAddInterest} 
+      handleRemoveInterest={handleRemoveInterest} 
+    />
   ];
 
   return (
@@ -259,6 +333,14 @@ const handleRemoveInterest = (index) => {
           transition={{ duration: 0.5 }}
         />
       </div>
+
+      {saveStatus.message && (
+        <div className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-md shadow-lg ${
+          saveStatus.isError ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+        }`}>
+          {saveStatus.message}
+        </div>
+      )}
 
       <main className="container mx-auto pt-6 px-4 pb-16">
         <div className="flex justify-center space-x-2 mb-8 overflow-x-auto py-1">
@@ -328,10 +410,19 @@ const handleRemoveInterest = (index) => {
                 onClick={handleCompleteProfile}
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center gap-2 bg-[#2E8B57] text-white px-6 py-3 rounded-lg font-medium shadow-md hover:bg-[#3CB371]"
+                disabled={isSubmitting}
+                className={`flex items-center gap-2 ${
+                  isSubmitting ? 'bg-gray-400' : 'bg-[#2E8B57] hover:bg-[#3CB371]'
+                } text-white px-6 py-3 rounded-lg font-medium shadow-md`}
               >
-                Complete Profile
-                <CheckCircleIcon className="w-5 h-5" />
+                {isSubmitting ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    Complete Profile
+                    <CheckCircleIcon className="w-5 h-5" />
+                  </>
+                )}
               </motion.button>
             </div>
           )}

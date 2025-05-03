@@ -17,10 +17,10 @@ const Login = () => {
     setIsAdmin,
     userName,
     setUserName,
-    userPhoto,
-    setUserPhoto,
+    // Removed setUserPhoto since it's not being used in the context
   } = useAuthContext();
   const [showProfile, setShowProfile] = useState(false);
+  const [userPhoto, setUserPhoto] = useState(null); // Added local state for user photo
   const modalRef = useRef(null);
   const navigate = useNavigate();
 
@@ -41,7 +41,7 @@ const Login = () => {
           setSignedIn(true);
           setIsAdmin(response.data.isAdmin);
           setUserName(response.data.name);
-          setUserPhoto(user.photoURL);
+          setUserPhoto(user.photoURL); // Using local state instead of context
 
           if (isNewUser && !localStorage.getItem("hasRedirected")) {
             localStorage.setItem("hasRedirected", "true");
@@ -52,11 +52,12 @@ const Login = () => {
         }
       } else {
         setSignedIn(false);
+        setUserPhoto(null);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [setSignedIn, setIsAdmin, setUserName, navigate]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -83,6 +84,7 @@ const Login = () => {
       .signOut()
       .then(() => {
         setSignedIn(false);
+        setUserPhoto(null);
         localStorage.removeItem("hasRedirected");
       })
       .catch((error) => {

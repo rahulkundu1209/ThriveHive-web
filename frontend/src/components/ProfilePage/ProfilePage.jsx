@@ -1,40 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add onAuthStateChanged
 import { useAuthContext } from "../../App";
 
 const LOCAL_STORAGE_KEY = 'profileFormData';
 
 const ProfileDisplay = () => {
-  const { userName, setUserPhoto } = useAuthContext();
+  const { userName } = useAuthContext();
   const [profileData, setProfileData] = useState(null);
-
-  // Load profile data from localStorage
-  useEffect(() => {
-    const loadProfileData = () => {
-      try {
-        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          setProfileData(parsedData);
-        } else {
-          setProfileData(getDefaultProfileData(userName, setUserPhoto));
-        }
-      } catch (error) {
-        console.error('Error loading profile data:', error);
-        setProfileData(getDefaultProfileData(userName, setUserPhoto));
-      }
-    };
-
-    loadProfileData();
-  }, [userName, setUserPhoto]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null);
+  const auth = getAuth();
 
   // Get default profile data structure
   const getDefaultProfileData = (name, photo) => ({
     fullName: name || 'Not available',
     location: 'Not available',
     languages: 'Not available',
-    avatar: photo || '',
+    avatar: photo || '', // Use the passed photo URL
+    // ... rest of the fields remain the same
     aboutYourself: 'Not available',
     describeSelf: 'Not available',
     friendDescription: 'Not available',
@@ -63,12 +48,102 @@ const ProfileDisplay = () => {
     availableFor: 'Not available',
     similarSkills: false,
     complementaryStrengths: false,
-    openHearted: false
+    openHearted: false,
+    interests: []
   });
 
-  if (!profileData) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading profile...</div>;
-  }
+  // Fetch profile data from backend
+  const fetchProfileFromBackend = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No authenticated user');
+      }
+
+      const idToken = await user.getIdToken();
+      const response = await fetch('http://localhost:5000/api/profile/get', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+  };
+
+  // Set up auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserPhoto(user.photoURL);
+      } else {
+        setUserPhoto(null);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  // Load profile data
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Try to get from backend first
+        try {
+          const backendData = await fetchProfileFromBackend();
+          if (backendData && !backendData.error) {
+            // Merge backend data with current photo
+            setProfileData({
+              ...getDefaultProfileData(userName, userPhoto),
+              ...backendData,
+              avatar: backendData.avatar || userPhoto // Prefer backend avatar, fallback to Firebase photo
+            });
+            setLoading(false);
+            return;
+          }
+        } catch (backendError) {
+          console.log('Falling back to local storage due to:', backendError);
+        }
+        
+        // Fallback to localStorage if backend fails
+        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setProfileData({
+            ...getDefaultProfileData(userName, userPhoto),
+            ...parsedData,
+            avatar: parsedData.avatar || userPhoto // Prefer saved avatar, fallback to Firebase photo
+          });
+        } else {
+          setProfileData(getDefaultProfileData(userName, userPhoto));
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    // Only try to load if we have an authenticated user
+    if (auth.currentUser) {
+      loadProfileData();
+    } else {
+      setError('Please sign in to view your profile');
+      setLoading(false);
+    }
+  }, [userName, auth, userPhoto]); // Add userPhoto to dependencies
+
 
   // Helper function to get value or "Not available"
   const getValue = (value, defaultValue = 'Not available') => {
@@ -81,22 +156,55 @@ const ProfileDisplay = () => {
   // Format contributions array from checkboxes
   const formatContributions = () => {
     const contributions = [];
-    if (profileData.mentoring) contributions.push('Mentoring');
-    if (profileData.localCircles) contributions.push('Local Circles');
-    if (profileData.creativity) contributions.push('Creativity');
-    if (profileData.time) contributions.push('Time');
+    if (profileData?.mentoring) contributions.push('Mentoring');
+    if (profileData?.localCircles) contributions.push('Local Circles');
+    if (profileData?.creativity) contributions.push('Creativity');
+    if (profileData?.time) contributions.push('Time');
     return contributions.length > 0 ? contributions : ['Not available'];
   };
 
   // Format connection preferences
   const formatConnectionPreferences = () => {
     const prefs = [];
-    if (profileData.similarSkills) prefs.push('Similar Skills');
-    if (profileData.complementaryStrengths) prefs.push('Complementary Strengths');
-    if (profileData.openHearted) prefs.push('Open Hearted');
+    if (profileData?.similarSkills) prefs.push('Similar Skills');
+    if (profileData?.complementaryStrengths) prefs.push('Complementary Strengths');
+    if (profileData?.openHearted) prefs.push('Open Hearted');
     return prefs.length > 0 ? prefs : ['Not specified'];
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-700 text-lg">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-md">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error Loading Profile</h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          {error === 'Please sign in to view your profile' ? (
+            <Link to="/login" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Go to Login
+            </Link>
+          ) : (
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Try Again
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="pt-10 pb-16 px-4 sm:px-6 lg:px-8">
@@ -121,7 +229,7 @@ const ProfileDisplay = () => {
   
         {/* Profile Header */}
         <div className="max-w-7xl mx-auto px-4">
-        <div className="bg-gradient-to-br from-[#c4e3f5]/80 to-[#f5d4e3]/80 rounded-3xl p-8 shadow-2xl backdrop-blur-lg border border-white/30">
+          <div className="bg-gradient-to-br from-[#c4e3f5]/80 to-[#f5d4e3]/80 rounded-3xl p-8 shadow-2xl backdrop-blur-lg border border-white/30">
             <div className="flex flex-col md:flex-row items-center gap-10">
               {/* Avatar */}
               <div className="relative group hover:scale-105 transition-transform duration-300">
@@ -130,6 +238,9 @@ const ProfileDisplay = () => {
                     src={getValue(profileData.avatar, 'https://via.placeholder.com/150')} 
                     alt="Profile" 
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/150';
+                    }}
                   />
                 </div>
               </div>
@@ -231,7 +342,6 @@ const ProfileDisplay = () => {
       </main>
     </div>
   );
-  
 };
 
 // Reusable Components
@@ -244,8 +354,6 @@ const SectionCard = ({ title, children }) => (
   </div>
 );
 
-
-// Reusable Label + Value block
 const DetailItem = ({ label, value, highlight }) => (
   <div className={`flex flex-col gap-1 ${highlight ? 'bg-blue-50 p-5 rounded-xl border border-blue-200 shadow-sm' : ''}`}>
     <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -257,14 +365,17 @@ const DetailItem = ({ label, value, highlight }) => (
   </div>
 );
 
-
-// Tag list (chips)
 const TagList = ({ items, color = 'blue' }) => (
   <div className="flex flex-wrap gap-2 mt-2">
     {items.map((item, index) => (
       <span
         key={index}
-        className={`px-3 py-1 rounded-full text-sm font-medium bg-${color}-100 text-${color}-800 hover:scale-105 hover:bg-${color}-200 transition-all duration-150`}
+        className={`px-3 py-1 rounded-full text-sm font-medium ${
+          color === 'blue' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+          color === 'green' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+          color === 'indigo' ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' :
+          'bg-gray-100 text-gray-800 hover:bg-gray-200'
+        } hover:scale-105 transition-all duration-150`}
       >
         {item}
       </span>
