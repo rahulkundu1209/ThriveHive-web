@@ -142,34 +142,34 @@ const ProfileEdit = ({ profileData = {} }) => {
       y: rect.top + window.scrollY - 40
     });
   };
+// Add these handler functions in your ProfileEdit component
+const handleAddSkill = (e) => {
+  e.preventDefault();
+  if (skillInput.trim() && !skills.includes(skillInput.trim())) {
+    setSkills([...skills, skillInput.trim()]);
+    setSkillInput('');
+  }
+};
 
-  const handleAddSkill = (e) => {
-    e.preventDefault();
-    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-      setSkills([...skills, skillInput.trim()]);
-      setSkillInput('');
-    }
-  };
+const handleRemoveSkill = (index) => {
+  const newSkills = [...skills];
+  newSkills.splice(index, 1);
+  setSkills(newSkills);
+};
 
-  const handleRemoveSkill = (index) => {
-    const newSkills = [...skills];
-    newSkills.splice(index, 1);
-    setSkills(newSkills);
-  };
+const handleAddInterest = (e) => {
+  e.preventDefault();
+  if (interestInput.trim() && !interests.includes(interestInput.trim())) {
+    setInterests([...interests, interestInput.trim()]);
+    setInterestInput('');
+  }
+};
 
-  const handleAddInterest = (e) => {
-    e.preventDefault();
-    if (interestInput.trim() && !interests.includes(interestInput.trim())) {
-      setInterests([...interests, interestInput.trim()]);
-      setInterestInput('');
-    }
-  };
-
-  const handleRemoveInterest = (index) => {
-    const newInterests = [...interests];
-    newInterests.splice(index, 1);
-    setInterests(newInterests);
-  };
+const handleRemoveInterest = (index) => {
+  const newInterests = [...interests];
+  newInterests.splice(index, 1);
+  setInterests(newInterests);
+};
 
   const navigateSection = (direction) => {
     const newSection = direction === 'next' ? currentSection + 1 : currentSection - 1;
@@ -177,6 +177,26 @@ const ProfileEdit = ({ profileData = {} }) => {
       setCurrentSection(newSection);
       window.scrollTo(0, 0);
     }
+  };
+
+  const handleListUpdate = (type, e) => {
+    const input = type === 'skill' ? skillInput : interestInput;
+    const setInput = type === 'skill' ? setSkillInput : setInterestInput;
+    const setList = type === 'skill' ? setSkills : setInterests;
+    const list = type === 'skill' ? skills : interests;
+
+    if ((e.key === 'Enter' || e.type === 'click') && input.trim()) {
+      if (!list.includes(input.trim())) {
+        setList([...list, input.trim()]);
+        setInput('');
+      }
+      if (e.key === 'Enter') e.preventDefault();
+    }
+  };
+
+  const removeItem = (type, index) => {
+    const setList = type === 'skill' ? setSkills : setInterests;
+    setList(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAvatarUpload = (e) => {
@@ -203,64 +223,21 @@ const ProfileEdit = ({ profileData = {} }) => {
     }
   };
 
-  const handleCompleteProfile = async () => {
+  const handleCompleteProfile = () => {
     setIsSubmitting(true);
-    
-    try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-
-      // Prepare the data to be sent to your backend
-      const profileData = {
-        ...formData,
-        skills,
-        interests,
-        avatar: avatarPreview,
-        firebaseUID: user.uid // Include Firebase UID
-      };
-
-      // Call your backend API endpoint
-      const response = await fetch('https://your-backend-api.com/save-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
-        },
-        body: JSON.stringify(profileData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save profile');
-      }
-
-      // Clear local storage after successful save
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      
-      // Navigate to profile page after a short delay
-      setTimeout(() => navigate("/profile"), 1500);
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
-      setIsSubmitting(false);
-    }
+    setTimeout(() => navigate("/profile"), 1500);
   };
 
   const sectionComponents = [
     <Foundation key={0} {...{ formData, handleInputChange, avatarPreview, handleAvatarUpload, showTooltip }} />,
     <Self key={1} {...{ formData, handleInputChange, showTooltip }} />,
     <Purpose key={2} {...{ formData, handleInputChange, showTooltip }} />,
-    <Skills key={3} formData={formData} handleInputChange={handleInputChange} skills={skills} skillInput={skillInput} setSkillInput={setSkillInput} handleAddSkill={handleAddSkill} handleRemoveSkill={handleRemoveSkill} />,
+    <Skills  key={3}  formData={formData}   handleInputChange={handleInputChange} skills={skills} skillInput={skillInput}  setSkillInput={setSkillInput}   handleAddSkill={handleAddSkill}   handleRemoveSkill={handleRemoveSkill} />,
     <Life key={4} {...{ formData, handleInputChange }} />,
     <Dreams key={5} {...{ formData, handleInputChange }} />,
     <Reflection key={6} {...{ formData, handleInputChange }} />,
     <Community key={7} formData={formData} handleInputChange={handleInputChange} interests={interests} setInterests={setInterests} interestInput={interestInput} setInterestInput={setInterestInput} handleAddInterest={handleAddInterest} handleRemoveInterest={handleRemoveInterest} />
   ];
-
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
