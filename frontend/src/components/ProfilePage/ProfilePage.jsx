@@ -99,12 +99,12 @@ const ProfileDisplay = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="pt-10 pb-16 px-4 sm:px-6 lg:px-8">
         {/* Edit Profile Button */}
-        <div className="max-w-7xl mx-auto mb-8 flex justify-end">
+        <div className="max-w-7xl mx-auto mb-10 flex justify-end">
           <Link 
             to="/edit" 
-            className="flex items-center space-x-2 bg-[#1E88E5] hover:bg-[#1565C0] transition-all duration-300 px-5 py-2.5 rounded-lg shadow-sm"
+            className="flex items-center space-x-2 bg-[#1E88E5] hover:bg-[#1565C0] transition-all duration-300 px-5 py-2.5 rounded-xl shadow-md"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -118,15 +118,14 @@ const ProfileDisplay = () => {
             <span className="font-medium text-white">Edit Profile</span>
           </Link>
         </div>
-
+  
         {/* Profile Header */}
         <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-gradient-to-br from-[#c4e3f5]/80 to-[#f5d4e3]/80 rounded-3xl p-8 shadow-2xl backdrop-blur-lg border border-white/30">
-            <div className="flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-10">
-              
-              {/* Avatar Section */}
-              <div className="relative group">
-                <div className="w-36 h-36 rounded-full border-4 border-white shadow-xl overflow-hidden">
+        <div className="bg-gradient-to-br from-[#c4e3f5]/80 to-[#f5d4e3]/80 rounded-3xl p-8 shadow-2xl backdrop-blur-lg border border-white/30">
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              {/* Avatar */}
+              <div className="relative group hover:scale-105 transition-transform duration-300">
+                <div className="w-36 h-36 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-blue-200 group-hover:ring-blue-400 transition-all duration-300">
                   <img 
                     src={getValue(profileData.avatar, 'https://via.placeholder.com/150')} 
                     alt="Profile" 
@@ -134,21 +133,21 @@ const ProfileDisplay = () => {
                   />
                 </div>
               </div>
-
-              {/* Basic Info */}
-              <div className="text-center md:text-left flex flex-col space-y-4">
+  
+              {/* Info */}
+              <div className="text-center md:text-left space-y-4">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-[#2A2A2A] font-sans tracking-tight">
                   {getValue(profileData.fullName)}
                 </h1>
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-3 sm:space-y-0 text-gray-700 text-lg font-medium">
+  
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-10 space-y-3 sm:space-y-0 text-gray-700 text-lg font-medium">
                   <div className="flex items-center space-x-2">
                     <svg className="w-6 h-6 text-[#1E88E5]" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
                     <span>{getValue(profileData.location)}</span>
                   </div>
-
+  
                   <div className="flex items-center space-x-2">
                     <svg className="w-6 h-6 text-[#1E88E5]" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
@@ -159,20 +158,17 @@ const ProfileDisplay = () => {
               </div>
             </div>
           </div>
-
-          {/* Profile Sections Grid */}
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
-            
+  
+          {/* Profile Sections */}
+          <div className="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Left Column */}
             <div className="space-y-10">
-              {/* About Section */}
               <SectionCard title="About Me">
                 <p className="text-gray-700 text-base leading-relaxed mb-6">
                   {getValue(profileData.aboutYourself)}
                 </p>
                 <DetailItem label="Describe yourself in 3 words" value={getValue(profileData.describeSelf)} />
                 <DetailItem label="How would a friend describe you?" value={getValue(profileData.friendDescription)} />
-                
                 <div className="bg-yellow-100/60 p-5 rounded-xl">
                   <DetailItem 
                     label="✨ Life Mantra" 
@@ -181,15 +177,13 @@ const ProfileDisplay = () => {
                   />
                 </div>
               </SectionCard>
-
-              {/* Purpose Section */}
+  
               <SectionCard title="🌱 Purpose & Vision">
                 <DetailItem label="Why do you want to thrive?" value={getValue(profileData.whyThrive)} />
                 <DetailItem label="What does a 'good life' mean to you?" value={getValue(profileData.goodLife)} />
                 <DetailItem label="Current life aspirations" value={getValue(profileData.lifeAspirations)} />
               </SectionCard>
-
-              {/* Dreams Section */}
+  
               <SectionCard title="💭 Dreams & Imagination">
                 <DetailItem label="What would you do with no financial pressure?" value={getValue(profileData.noFinancialPressure)} />
                 <DetailItem label="What would you create with $1 million?" value={getValue(profileData.millionDollarCreation)} />
@@ -197,37 +191,32 @@ const ProfileDisplay = () => {
                 <DetailItem label="The world you want to build" value={getValue(profileData.worldToBuild)} />
               </SectionCard>
             </div>
-
+  
             {/* Right Column */}
             <div className="space-y-10">
-              {/* Skills Section */}
               <SectionCard title="🛠 Skills & Growth">
                 <TagList items={getValue(profileData.skills, []).length > 0 ? profileData.skills : ['Not available']} color="blue" />
                 <DetailItem label="Skills you want to learn" value={getValue(profileData.skillsToLearn)} />
                 <DetailItem label="What have you learned so far?" value={getValue(profileData.learnedSoFar)} />
               </SectionCard>
-
-              {/* Contributions Section */}
+  
               <SectionCard title="🤝 Contributions">
                 <TagList items={formatContributions()} color="green" />
                 <DetailItem label="What are you available for?" value={getValue(profileData.availableFor)} />
                 <DetailItem label="Connection preferences" value={formatConnectionPreferences().join(', ')} />
               </SectionCard>
-
-              {/* Life & Community Section */}
+  
               <SectionCard title="🌍 Life & Community">
                 <DetailItem label="Hobbies & interests" value={getValue(profileData.hobbies)} />
                 <DetailItem label="What makes you feel alive?" value={getValue(profileData.feelAlive)} />
                 <DetailItem label="What communities are you drawn to?" value={getValue(profileData.communityDrawn)} />
                 <TagList items={getValue(profileData.interests, []).length > 0 ? profileData.interests : ['Not available']} color="indigo" />
               </SectionCard>
-
-              {/* Reflections Section */}
+  
               <SectionCard title="🧠 Reflections & Growth">
                 <DetailItem label="What have you recently unlearned?" value={getValue(profileData.unlearned)} />
                 <DetailItem label="Where were you five years ago?" value={getValue(profileData.fiveYearsAgo)} />
                 <DetailItem label="What does peace mean to you?" value={getValue(profileData.peaceDefinition)} />
-                
                 <div className="bg-purple-100/60 p-5 rounded-xl">      
                   <DetailItem 
                     label="📩 Message to your future self" 
@@ -242,35 +231,40 @@ const ProfileDisplay = () => {
       </main>
     </div>
   );
+  
 };
 
 // Reusable Components
 const SectionCard = ({ title, children }) => (
-  <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-    <h2 className="text-2xl font-bold text-gray-800 mb-6 font-sans border-b-2 border-[#1E88E5] pb-2">
+  <div className="bg-white/90 rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 backdrop-blur-sm">
+    <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 border-b-2 border-blue-400/50 pb-2 tracking-tight">
       {title}
     </h2>
     <div className="space-y-6">{children}</div>
   </div>
 );
 
+
+// Reusable Label + Value block
 const DetailItem = ({ label, value, highlight }) => (
-  <div className={`${highlight ? 'p-4 rounded-xl bg-opacity-10' : ''}`}>
-    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+  <div className={`flex flex-col gap-1 ${highlight ? 'bg-blue-50 p-5 rounded-xl border border-blue-200 shadow-sm' : ''}`}>
+    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
       {label}
-    </h3>
-    <p className={`${highlight ? 'text-lg' : 'text-base'} text-gray-800 leading-relaxed`}>
+    </span>
+    <span className={`text-gray-800 ${highlight ? 'text-lg font-semibold' : 'text-base'}`}>
       {value}
-    </p>
+    </span>
   </div>
 );
 
+
+// Tag list (chips)
 const TagList = ({ items, color = 'blue' }) => (
   <div className="flex flex-wrap gap-2 mt-2">
     {items.map((item, index) => (
-      <span 
+      <span
         key={index}
-        className={`px-3 py-1 rounded-full text-sm font-medium bg-${color}-100 text-${color}-800`}
+        className={`px-3 py-1 rounded-full text-sm font-medium bg-${color}-100 text-${color}-800 hover:scale-105 hover:bg-${color}-200 transition-all duration-150`}
       >
         {item}
       </span>
