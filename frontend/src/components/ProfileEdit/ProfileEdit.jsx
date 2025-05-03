@@ -252,7 +252,7 @@ const handleRemoveInterest = (index) => {
         </motion.div>
       )}
 
-      <div className="fixed top-0 left-0 right-0 h-2 bg-gray-200 z-50">
+      <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200 z-2">
         <motion.div 
           className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
           animate={{ width: `${progress}%` }}
