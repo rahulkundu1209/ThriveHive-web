@@ -9,12 +9,6 @@ router.post('/submit', handleWorksheetResponseSubmit);
 router.get('/adminview', handleadminViewWorksheetResponse);
 
 router.get('/auto-submit', async (req, res) => {
-  const { key } = req.query;
-  const CRON_KEY = process.env.CRON_KEY;
-
-  if (key !== CRON_KEY) {
-    return res.status(403).send('Forbidden: Invalid key.');
-  }
 
   try {
     await handleAutomaticWorksheetResponseSubmit(1);
