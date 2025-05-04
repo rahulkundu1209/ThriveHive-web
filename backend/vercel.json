@@ -16,7 +16,7 @@
   ],
   "crons": [
     {
-      "path": "/worksheet-response/auto-submit?key=${CRON_KEY}",
+      "path": "/worksheet-response/auto-submit/?key=${CRON_KEY}",
       "schedule": "32 18 * * *"
     }
   ]
