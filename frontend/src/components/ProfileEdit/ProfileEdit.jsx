@@ -200,6 +200,7 @@ const ProfileEdit = ({ profileData = {} }) => {
     setList(prev => prev.filter((_, i) => i !== index));
   };
 
+
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (file) {

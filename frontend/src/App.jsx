@@ -25,6 +25,8 @@ function App() {
       <Router>
         <RootLayout />
         <Routes>
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/edit" element={<ProfileEdit />} />
           <Route path="/" element={<Home />} />
           <Route path="/edit" element={<ProfileEdit />} />
           <Route path="/profile" element={<ProfileDisplay />} />

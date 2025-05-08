@@ -8,7 +8,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const ADMIN_EMAILS = ["rahulkundu1209@gmail.com", "thrivehivenow@gmail.com"];
+const ADMIN_EMAILS = ["rahulkundu1209@gmail.com"];
 
 async function setAdminRole(email) {
   try {

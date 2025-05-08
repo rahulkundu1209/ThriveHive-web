@@ -244,7 +244,7 @@ const ProfileDisplay = () => {
                   />
                 </div>
               </div>
-  
+ 
               {/* Info */}
               <div className="text-center md:text-left space-y-4">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-[#2A2A2A] font-sans tracking-tight">
