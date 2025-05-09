@@ -23,7 +23,6 @@ const Login = () => {
   const [userPhoto, setUserPhoto] = useState(null); // Added local state for user photo
   const modalRef = useRef(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -37,11 +36,14 @@ const Login = () => {
             `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`,
             { token: idToken }
           );
+          console.log(response.data);
 
           setSignedIn(true);
           setIsAdmin(response.data.isAdmin);
           setUserName(response.data.name);
-          setUserPhoto(user.photoURL); // Using local state instead of context
+          const photoUrl = response.data.picture; // Use the photo URL from the response or fallback to Firebase
+          console.log(photoUrl);
+          setUserPhoto(photoUrl);
 
           if (isNewUser && !localStorage.getItem("hasRedirected")) {
             localStorage.setItem("hasRedirected", "true");
@@ -104,6 +106,7 @@ const Login = () => {
               <img
                 src={userPhoto}
                 alt="User"
+                onError={(e) => (e.target.src = '/default-avatar.png')} // Fallback to a default image
                 className="h-10 w-10 rounded-full border-2 border-white shadow-md hover:ring-2 hover:ring-blue-400 transition-all duration-200"
               />
             ) : (
