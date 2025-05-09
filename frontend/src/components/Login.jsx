@@ -1,98 +1,158 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { auth, provider, signInWithPopup } from "../utils/firebaseConfig";
 import axios from "axios";
-import { UserCircleIcon, ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/solid";
+import {
+  UserCircleIcon,
+  ArrowRightStartOnRectangleIcon,
+} from "@heroicons/react/24/solid";
 import { useAuthContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const {signedIn, setSignedIn, isAdmin, setIsAdmin, userName, setUserName} = useAuthContext(); // Global Auth state
+  const {
+    signedIn,
+    setSignedIn,
+    isAdmin,
+    setIsAdmin,
+    userName,
+    setUserName,
+    // Removed setUserPhoto since it's not being used in the context
+  } = useAuthContext();
   const [showProfile, setShowProfile] = useState(false);
-
+  const [userPhoto, setUserPhoto] = useState(null); // Added local state for user photo
+  const modalRef = useRef(null);
+  const navigate = useNavigate();
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setSignedIn(true);
+        const idToken = await user.getIdToken();
+        const isNewUser =
+          user.metadata.creationTime === user.metadata.lastSignInTime;
 
-        const idToken = await user.getIdToken(); // Get Firebase ID Token
-        // console.log(idToken);
-        const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`, { token: idToken });
-        // console.log("Backend Response:", response.data);
-        setIsAdmin(response.data.isAdmin);
-        setUserName(response.data.name);
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/auth/google`,
+            { token: idToken }
+          );
+          console.log(response.data);
+
+          setSignedIn(true);
+          setIsAdmin(response.data.isAdmin);
+          setUserName(response.data.name);
+          const photoUrl = response.data.picture; // Use the photo URL from the response or fallback to Firebase
+          console.log(photoUrl);
+          setUserPhoto(photoUrl);
+
+          if (isNewUser && !localStorage.getItem("hasRedirected")) {
+            localStorage.setItem("hasRedirected", "true");
+            navigate("/edit");
+          }
+        } catch (error) {
+          console.error("Authentication error:", error);
+        }
       } else {
         setSignedIn(false);
+        setUserPhoto(null);
       }
-      // setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [signedIn]); // Debugging to check if state updates
+  }, [setSignedIn, setIsAdmin, setUserName, navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        setShowProfile(false);
+      }
+    };
+    if (showProfile) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showProfile]);
 
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
-      
-
-      // Send token to the backend
-      
-
-      // console.log("Backend Response:", response.data);
-
-      setSignedIn(true); // Update Auth Context
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
   };
 
   const handleSignOut = () => {
-    auth.signOut().then(() => {
-      setSignedIn(false);
-    }).catch(error => {
-      console.error("Sign Out Error:", error);
-    });
+    auth
+      .signOut()
+      .then(() => {
+        setSignedIn(false);
+        setUserPhoto(null);
+        localStorage.removeItem("hasRedirected");
+      })
+      .catch((error) => {
+        console.error("Sign Out Error:", error);
+      });
   };
 
   return (
-    <div>
+    <div className="relative z-50">
       {signedIn ? (
-        <div className="">
-          {/* Profile Icon */}
-          <UserCircleIcon
-            className="h-10 w-10 text-white bg-white/20 p-1 rounded-full lg:cursor-pointer"
-            onClick={() => setShowProfile(!showProfile)}
-          />
+        <div className="flex items-center space-x-2">
+          <div
+            onClick={() => setShowProfile(true)}
+            className="cursor-pointer z-50"
+          >
+            {userPhoto ? (
+              <img
+                src={userPhoto}
+                alt="User"
+                onError={(e) => (e.target.src = '/default-avatar.png')} // Fallback to a default image
+                className="h-10 w-10 rounded-full border-2 border-white shadow-md hover:ring-2 hover:ring-blue-400 transition-all duration-200"
+              />
+            ) : (
+              <UserCircleIcon className="h-10 w-10 text-white bg-white/20 p-1 rounded-full hover:ring-2 hover:ring-blue-400 transition-all duration-200" />
+            )}
+          </div>
 
-          {/* Sign Out Dropdown */}
-            <div className={`absolute lg:${showProfile ? 'inline' : 'hidden'} lg:right-0 right-4 mt-2 w-50 lg:bg-white lg:text-black rounded-lg lg:shadow-lg p-2`}>
-              <div className="text-center font-semibold text-lg flex border-b border-gray-300 pb-2 mb-2"> 
-                <p>
-                  Hello, {userName}! 🌝
-                  <br/>
-                  {isAdmin && "You have admin access!"}
-                </p>
-              </div>
-              <div className="border-b border-gray-300 pb-2 mb-2">
-                <a href="#">Your Profile</a>
-              </div>
-              <div className="border-gray-300 pb-2">
-                <button
-                  className="block w-full text-center p-2 rounded-xl hover:lg:bg-gray-200 hover:text-babyblue lg:hover:text-black hover:cursor-pointer"
-                  onClick={handleSignOut}
-                >
-                  Sign Out
-                  <ArrowRightStartOnRectangleIcon className="h-5 w-5 inline ml-2" />
-                </button>
+          {/* Modal */}
+          {showProfile && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-start justify-end p-4 z-40">
+              <div
+                ref={modalRef}
+                className="w-64 mt-14 bg-white text-black rounded-xl shadow-2xl border border-gray-200 animate-fade-in"
+              >
+                <div className="px-4 py-3 border-b border-gray-300">
+                  <p className="font-semibold text-lg">Hello, {userName}! 🌝</p>
+                  {isAdmin && (
+                    <p className="text-sm text-blue-500 mt-1">
+                      You have admin access!
+                    </p>
+                  )}
+                </div>
+                <div className="px-4 py-2 border-b border-gray-300 hover:bg-gray-100 transition cursor-pointer">
+                  <a href="/profile" className="block w-full">
+                    Your Profile
+                  </a>
+                </div>
+                <div className="px-4 py-2">
+                  <button
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                    onClick={handleSignOut}
+                  >
+                    Sign Out
+                    <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
+          )}
         </div>
       ) : (
-        <button 
-          className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 hover:cursor-pointer"
+        <button
+          className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
           onClick={handleGoogleSignIn}
         >
-          Sign In
+          Sign In with Google
         </button>
       )}
     </div>
