@@ -1,97 +1,211 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getAuth } from 'firebase/auth';
+import { useAuthContext } from '../../App';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import Foundation from './sections/Foundation';
+import Self from './sections/Self';
+import Purpose from './sections/Purpose';
+import Dreams from './sections/Dreams';
+import Life from './sections/Life';
+import Community from './sections/Community';
+import Reflection from './sections/Reflection';
+import Skills from './sections/Skills';
 
-const ProfileEdit = ({ profileData }) => {
+const LOCAL_STORAGE_KEY = 'profileFormData';
+
+const ProfileEdit = ({ profileData = {} }) => {
   const navigate = useNavigate();
+  const { setSignedIn } = useAuthContext();
   const [currentSection, setCurrentSection] = useState(0);
-  const [avatarPreview, setAvatarPreview] = useState(profileData?.avatar || '');
-  const [skills, setSkills] = useState(profileData?.skills || []);
-  const [interests, setInterests] = useState(profileData?.interests || []);
+  const [avatarPreview, setAvatarPreview] = useState('');
+  const [skills, setSkills] = useState([]);
+  const [interests, setInterests] = useState([]);
   const [skillInput, setSkillInput] = useState('');
   const [interestInput, setInterestInput] = useState('');
   const [progress, setProgress] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tooltip, setTooltip] = useState({ show: false, text: '', x: 0, y: 0 });
+  const [saveStatus, setSaveStatus] = useState({ message: '', isError: false });
 
   const sections = [
     'foundational', 'introduction', 'purpose', 
     'skills', 'life', 'dreams', 'reflection', 'community'
   ];
 
-  const [formData, setFormData] = useState({
-    fullName: profileData?.fullName || '',
-    location: profileData?.location || '',
-    languages: profileData?.languages || '',
-    aboutYourself: profileData?.aboutYourself || '',
-    describeSelf: profileData?.describeSelf || '',
-    friendDescription: profileData?.friendDescription || '',
-    lifeMantra: profileData?.lifeMantra || '',
-    whyThrive: profileData?.whyThrive || '',
-    goodLife: profileData?.goodLife || '',
-    lifeAspirations: profileData?.lifeAspirations || '',
-    noFinancialPressure: profileData?.noFinancialPressure || '',
-    millionDollarCreation: profileData?.millionDollarCreation || '',
-    skillsToLearn: profileData?.skillsToLearn || '',
-    mentoring: profileData?.contributions?.includes('Mentoring') || false,
-    localCircles: profileData?.contributions?.includes('Starting Local Circles') || false,
-    creativity: profileData?.contributions?.includes('Your Creativity') || false,
-    time: profileData?.contributions?.includes('Your Time') || false,
-    learnedSoFar: profileData?.learnedSoFar || '',
-    hobbies: profileData?.hobbies || '',
-    feelAlive: profileData?.feelAlive || '',
-    communityDrawn: profileData?.communityDrawn || '',
-    wildestDream: profileData?.wildestDream || '',
-    worldToBuild: profileData?.worldToBuild || '',
-    unlearned: profileData?.unlearned || '',
-    fiveYearsAgo: profileData?.fiveYearsAgo || '',
-    peaceDefinition: profileData?.peaceDefinition || '',
-    futureMessage: profileData?.futureMessage || '',
-    availableFor: profileData?.availableFor || '',
-    similarSkills: profileData?.similarSkills || false,
-    complementaryStrengths: profileData?.complementaryStrengths || false,
-    openHearted: profileData?.openHearted || false,
+  const sectionColors = [
+    '#1E88E5', '#6A0DAD', '#1E88E5', 
+    '#2E8B57', '#FFA500', '#FF6B6B', 
+    '#6A5ACD', '#008080'
+  ];
+
+  // Default form data structure
+  const defaultFormData = {
+    fullName: '',
+    location: '',
+    languages: '',
+    aboutYourself: '',
+    describeSelf: '',
+    friendDescription: '',
+    lifeMantra: '',
+    whyThrive: '',
+    goodLife: '',
+    lifeAspirations: '',
+    noFinancialPressure: '',
+    millionDollarCreation: '',
+    skillsToLearn: '',
+    mentoring: false,
+    localCircles: false,
+    creativity: false,
+    time: false,
+    learnedSoFar: '',
+    hobbies: '',
+    feelAlive: '',
+    communityDrawn: '',
+    wildestDream: '',
+    worldToBuild: '',
+    unlearned: '',
+    fiveYearsAgo: '',
+    peaceDefinition: '',
+    futureMessage: '',
+    availableFor: '',
+    similarSkills: false,
+    complementaryStrengths: false,
+    openHearted: false,
+  };
+
+  // Initialize all state from localStorage or props
+  const [formData, setFormData] = useState(() => {
+    try {
+      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedData) {
+        return {
+          ...defaultFormData,
+          ...JSON.parse(savedData),
+        };
+      }
+      return {
+        ...defaultFormData,
+        ...profileData,
+      };
+    } catch (error) {
+      console.error('Failed to initialize form data:', error);
+      return defaultFormData;
+    }
   });
 
+  // Initialize skills, interests, and avatar from saved data
   useEffect(() => {
-    const newProgress = ((currentSection + 1) / sections.length) * 100;
-    setProgress(newProgress);
-  }, [currentSection]);
+    try {
+      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.skills) setSkills(parsedData.skills);
+        if (parsedData.interests) setInterests(parsedData.interests);
+        if (parsedData.avatar) setAvatarPreview(parsedData.avatar);
+      }
+    } catch (error) {
+      console.error('Failed to initialize from localStorage:', error);
+    }
+  }, []);
 
-  const handleSectionNavigation = (direction) => {
-    if (direction === 'next' && currentSection < sections.length - 1) {
-      setCurrentSection(prev => prev + 1);
-    } else if (direction === 'prev' && currentSection > 0) {
-      setCurrentSection(prev => prev - 1);
+  // Combined effect to handle all localStorage saves
+  useEffect(() => {
+    const saveData = {
+      ...formData,
+      skills,
+      interests,
+      avatar: avatarPreview
+    };
+    
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(saveData));
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
+  }, [formData, skills, interests, avatarPreview]);
+
+  // Auth and progress tracking
+  useEffect(() => {
+    const auth = getAuth();
+    if (!auth.currentUser) navigate('/');
+    setProgress(((currentSection + 1) / sections.length) * 100);
+  }, [currentSection, navigate]);
+
+  const showTooltip = (text, e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      show: true,
+      text,
+      x: rect.left + window.scrollX,
+      y: rect.top + window.scrollY - 40
+    });
+  };
+
+  const handleAddSkill = (e) => {
+    e.preventDefault();
+    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
+      setSkills([...skills, skillInput.trim()]);
+      setSkillInput('');
     }
   };
 
-  const handleSkillAdd = (e) => {
-    if (e.key === 'Enter' && skillInput.trim()) {
-      if (!skills.includes(skillInput.trim())) {
-        setSkills([...skills, skillInput.trim()]);
-        setSkillInput('');
-      }
-      e.preventDefault();
+  const handleRemoveSkill = (index) => {
+    const newSkills = [...skills];
+    newSkills.splice(index, 1);
+    setSkills(newSkills);
+  };
+
+  const handleAddInterest = (e) => {
+    e.preventDefault();
+    if (interestInput.trim() && !interests.includes(interestInput.trim())) {
+      setInterests([...interests, interestInput.trim()]);
+      setInterestInput('');
     }
   };
 
-  const handleInterestAdd = (e) => {
-    if (e.key === 'Enter' && interestInput.trim()) {
-      if (!interests.includes(interestInput.trim())) {
-        setInterests([...interests, interestInput.trim()]);
-        setInterestInput('');
-      }
-      e.preventDefault();
+  const handleRemoveInterest = (index) => {
+    const newInterests = [...interests];
+    newInterests.splice(index, 1);
+    setInterests(newInterests);
+  };
+
+  const navigateSection = (direction) => {
+    const newSection = direction === 'next' ? currentSection + 1 : currentSection - 1;
+    if (newSection >= 0 && newSection < sections.length) {
+      setCurrentSection(newSection);
+      window.scrollTo(0, 0);
     }
-  }; 
+  };
+
+  const handleListUpdate = (type, e) => {
+    const input = type === 'skill' ? skillInput : interestInput;
+    const setInput = type === 'skill' ? setSkillInput : setInterestInput;
+    const setList = type === 'skill' ? setSkills : setInterests;
+    const list = type === 'skill' ? skills : interests;
+
+    if ((e.key === 'Enter' || e.type === 'click') && input.trim()) {
+      if (!list.includes(input.trim())) {
+        setList([...list, input.trim()]);
+        setInput('');
+      }
+      if (e.key === 'Enter') e.preventDefault();
+    }
+  };
+
+  const removeItem = (type, index) => {
+    const setList = type === 'skill' ? setSkills : setInterests;
+    setList(prev => prev.filter((_, i) => i !== index));
+  };
+
 
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
+      reader.onloadend = () => setAvatarPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -103,646 +217,256 @@ const ProfileEdit = ({ profileData }) => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
-  // Keep your existing handlers (handleAvatarUpload, handleInputChange, etc.)
+
+  const handleResetProfile = () => {
+    if (window.confirm('Are you sure you want to reset your profile data?')) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      window.location.reload();
+    }
+  };
+
+  const saveProfileToBackend = async (profileData) => {
+    try {
+      const auth = getAuth();
+      const idToken = await auth.currentUser.getIdToken();
+      
+      const response = await fetch('http://localhost:5000/api/profile/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(profileData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      throw error;
+    }
+  };
+
+  const handleCompleteProfile = async () => {
+    setIsSubmitting(true);
+    setSaveStatus({ message: '', isError: false });
+    
+    try {
+      // Prepare the data to send to backend
+      const profileToSave = {
+        ...formData,
+        skills,
+        interests,
+        avatar: avatarPreview
+      };
+
+      // Save to backend
+      const response = await saveProfileToBackend(profileToSave);
+      
+      if (response.success) {
+        setSaveStatus({ message: 'Profile saved successfully!', isError: false });
+        // Clear local storage after successful save
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        
+        // Navigate after a short delay
+        setTimeout(() => navigate("/profile"), 1500);
+      } else {
+        setSaveStatus({ message: 'Failed to save profile. Please try again.', isError: true });
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setSaveStatus({ message: 'An error occurred while saving your profile.', isError: true });
+      setIsSubmitting(false);
+    }
+  };
+
+  const sectionComponents = [
+    <Foundation key={0} {...{ formData, handleInputChange, avatarPreview, handleAvatarUpload, showTooltip }} />,
+    <Self key={1} {...{ formData, handleInputChange, showTooltip }} />,
+    <Purpose key={2} {...{ formData, handleInputChange, showTooltip }} />,
+    <Skills 
+      key={3} 
+      formData={formData} 
+      handleInputChange={handleInputChange} 
+      skills={skills} 
+      skillInput={skillInput} 
+      setSkillInput={setSkillInput} 
+      handleAddSkill={handleAddSkill} 
+      handleRemoveSkill={handleRemoveSkill} 
+    />,
+    <Life key={4} {...{ formData, handleInputChange }} />,
+    <Dreams key={5} {...{ formData, handleInputChange }} />,
+    <Reflection key={6} {...{ formData, handleInputChange }} />,
+    <Community 
+      key={7} 
+      formData={formData} 
+      handleInputChange={handleInputChange} 
+      interests={interests} 
+      setInterests={setInterests} 
+      interestInput={interestInput} 
+      setInterestInput={setInterestInput} 
+      handleAddInterest={handleAddInterest} 
+      handleRemoveInterest={handleRemoveInterest} 
+    />
+  ];
 
   return (
-    <div className="bg-[#FFF9F5] min-h-screen">
-      {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50">
-        <div 
-          className="h-full bg-[#1E88E5] transition-all duration-400" 
-          style={{ width: `${progress}%` }}
-        ></div>
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      {tooltip.show && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bg-gray-800 text-white p-2 rounded-md shadow-lg z-50 text-sm"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.text}
+        </motion.div>
+      )}
+
+      <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200 z-2">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5 }}
+        />
       </div>
 
-      {/* Navigation */}
-      <nav className="bg-[#23465a] text-white flex items-center justify-between px-6 py-3 fixed top-0 left-0 right-0 z-40">
-        <img 
-          alt="logo" 
-          width="100px" 
-          src="https://thrive-hives.vercel.app/assets/Logo-DFWKnQHC.png" 
-        />
-        <div className="flex space-x-2">
+      {saveStatus.message && (
+        <div className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-md shadow-lg ${
+          saveStatus.isError ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+        }`}>
+          {saveStatus.message}
+        </div>
+      )}
+
+      <main className="container mx-auto pt-6 px-4 pb-16">
+        <div className="flex justify-center space-x-2 mb-8 overflow-x-auto py-1">
           {sections.map((_, index) => (
-            <button
+            <motion.button
               key={index}
               onClick={() => setCurrentSection(index)}
-              className={`w-8 h-8 rounded-full ${
-                index <= currentSection ? 'bg-[#1E88E5]' : 'bg-gray-600'
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${
+                index <= currentSection ? 'text-white' : 'bg-gray-200 text-gray-600'
               }`}
+              style={{ 
+                backgroundColor: index <= currentSection ? sectionColors[index] : undefined,
+                transform: currentSection === index ? 'scale(1.1)' : 'scale(1)'
+              }}
+              onMouseEnter={(e) => showTooltip(sections[index].charAt(0).toUpperCase() + sections[index].slice(1), e)}
+              onMouseLeave={() => setTooltip(prev => ({ ...prev, show: false }))}
             >
               {index + 1}
-            </button>
+            </motion.button>
           ))}
         </div>
-      </nav>
-      <main className="container mx-auto pt-24 px-4 pb-16">
-        {/* Foundational Information */}
-        {currentSection === 0 && (
-          <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-[#1E88E5] mb-6 font-sans">Foundational Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div className="flip-card avatar-upload">
-                  <div className="flip-card-inner">
-                    <div className="flip-card-front bg-[#7cae9] p-6 rounded-lg">
-                      <h3 className="text-xl font-semibold mb-4">Profile Photo</h3>
-                      <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto overflow-hidden">
-                        {avatarPreview ? (
-                          <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            No image
-                          </div>
-                        )}
-                      </div>
-                      <input 
-                        type="file" 
-                        onChange={handleAvatarUpload}
-                        accept="image/*" 
-                        className="hidden" 
-                        id="avatar-input"
-                      />
-                      <label 
-                        htmlFor="avatar-input"
-                        className="mt-4 bg-[#1E88E5] text-white px-4 py-2 rounded-lg cursor-pointer inline-block hover:bg-[#1565C0] transition-colors"
-                      >
-                        Choose Image
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Full Name"
-                  className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#1E88E5]"
-                  onChange={handleInputChange}
-                  value={formData.fullName}
-                />
-              </div>
-              <div className="space-y-6">
-                <input
-                  type="text"
-                  name="location"
-                  placeholder="Location (City, State, Country)"
-                  className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#1E88E5]"
-                  onChange={handleInputChange}
-                  value={formData.location}
-                />
-                <input
-                  type="text"
-                  name="languages"
-                  placeholder="Preferred Language(s)"
-                  className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#1E88E5]"
-                  onChange={handleInputChange}
-                  value={formData.languages}
-                />
-              </div>
-            </div>
-          </section>
-        )}
 
-        {/* Self Introduction */}
-        {currentSection === 1 && (
-          <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-[#6A0DAD] mb-6 font-sans">Self Introduction</h2>
-            <div className="space-y-6">
-              <textarea
-                name="aboutYourself"
-                placeholder="Who are you when no one's watching?"
-                className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#6A0DAD]"
-                onChange={handleInputChange}
-                value={formData.aboutYourself}
-              />
-              <input
-                type="text"
-                name="describeSelf"
-                placeholder="Describe yourself in 3 words"
-                className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#6A0DAD]"
-                onChange={handleInputChange}
-                value={formData.describeSelf}
-              />
-              <input
-                type="text"
-                name="friendDescription"
-                placeholder="Friend's 3-word description"
-                className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#6A0DAD]"
-                onChange={handleInputChange}
-                value={formData.friendDescription}
-              />
-              <div className="mantra-box p-6 rounded-lg text-white bg-gradient-to-r from-[#23465a] to-[#1E88E5]">
-                <textarea
-                  name="lifeMantra"
-                  placeholder="Your life mantra..."
-                  className="w-full bg-transparent placeholder-white focus:outline-none"
-                  onChange={handleInputChange}
-                  value={formData.lifeMantra}
-                />
-              </div>
-            </div>
-          </section>
-        )}
+        {sectionComponents[currentSection]}
 
-       {/* Purpose and Intention */}
-{currentSection === 2 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#1E88E5] mb-6 font-sans">Purpose & Intention</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <textarea
-          name="whyThrive"
-          placeholder="Why did you choose Thrive?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#1E88E5]"
-          onChange={handleInputChange}
-          value={formData.whyThrive}
-        />
-        <textarea
-          name="goodLife"
-          placeholder="What does a 'Good Life' mean to you?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#1E88E5]"
-          onChange={handleInputChange}
-          value={formData.goodLife}
-        />
-      </div>
-      <div className="space-y-6">
-        <select
-          name="lifeAspirations"
-          className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#1E88E5]"
-          onChange={handleInputChange}
-          value={formData.lifeAspirations}
+        <motion.div 
+          className="flex justify-between items-center max-w-4xl mx-auto mt-10 px-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <option value="">Current Life Aspirations</option>
-          <option value="Find a job">Find a job</option>
-          <option value="Start an organization">Start an organization</option>
-          <option value="Freelance">Freelance</option>
-          <option value="Build a community">Build a community</option>
-          <option value="Still exploring">Still exploring</option>
-          <option value="Other">Other</option>
-        </select>
-        <textarea
-          name="noFinancialPressure"
-          placeholder="If financial pressure didn't exist, what would you do with your life?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-24 focus:ring-2 focus:ring-[#1E88E5]"
-          onChange={handleInputChange}
-          value={formData.noFinancialPressure}
-        />
-        <div className="mantra-box p-6 rounded-lg text-white bg-gradient-to-r from-[#23465a] to-[#1E88E5]">
-          <textarea
-            name="millionDollarCreation"
-            placeholder="If you received 1 million dollars today, what would you create with it?"
-            className="w-full bg-transparent placeholder-white focus:outline-none"
-            onChange={handleInputChange}
-            value={formData.millionDollarCreation}
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-)}
-
-{/* Skills and Strengths */}
-{currentSection === 3 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#2E8B57] mb-6 font-sans">Skills & Strengths</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <div className="bg-[#F5E6D9] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Top Skills/Strengths</h3>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill, index) => (
-              <span key={index} className="bg-white px-4 py-2 rounded-full flex items-center">
-                {skill}
-                <button 
-                  onClick={() => removeSkill(index)}
-                  className="ml-2 text-red-500"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-            <input
-              type="text"
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-              onKeyDown={handleSkillAdd}
-              placeholder="Add skill"
-              className="px-4 py-2 border rounded-full"
-            />
-          </div>
-        </div>
-        <textarea
-          name="skillsToLearn"
-          placeholder="What skills would you like to learn or deepen on this platform?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#2E8B57]"
-          onChange={handleInputChange}
-          value={formData.skillsToLearn}
-        />
-      </div>
-      <div className="space-y-6">
-        <div className="bg-[#E8F5E9] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Community Contributions</h3>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="mentoring"
-                checked={formData.mentoring}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#2E8B57] focus:ring-[#2E8B57]"
-              />
-              Mentoring Others
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="localCircles"
-                checked={formData.localCircles}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#2E8B57] focus:ring-[#2E8B57]"
-              />
-              Starting Local Circles
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="creativity"
-                checked={formData.creativity}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#2E8B57] focus:ring-[#2E8B57]"
-              />
-              Your Creativity
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="time"
-                checked={formData.time}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#2E8B57] focus:ring-[#2E8B57]"
-              />
-              Your Time
-            </label>
-          </div>
-        </div>
-        <textarea
-          name="learnedSoFar"
-          placeholder="What have you learned so far on this platform?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#2E8B57]"
-          onChange={handleInputChange}
-          value={formData.learnedSoFar}
-        />
-      </div>
-    </div>
-  </section>
-)}
-
-{/* Life and Energy */}
-{currentSection === 4 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#FFA500] mb-6 font-sans">Life & Energy</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <textarea
-          name="hobbies"
-          placeholder="What are your hobbies or joys in life?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#FFA500]"
-          onChange={handleInputChange}
-          value={formData.hobbies}
-        />
-        <input
-          type="text"
-          name="feelAlive"
-          placeholder="What's something simple that makes you feel alive?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#FFA500]"
-          onChange={handleInputChange}
-          value={formData.feelAlive}
-        />
-      </div>
-      <div className="space-y-6">
-        <div className="bg-[#FFF3E0] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Community Attraction</h3>
-          <input
-            type="text"
-            name="communityDrawn"
-            placeholder="What kind of people or communities do you feel drawn to?"
-            className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#FFA500]"
-            onChange={handleInputChange}
-            value={formData.communityDrawn}
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-)}
-
-{/* Dreams and Imagination */}
-{currentSection === 5 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#FF6B6B] mb-6 font-sans">Dreams & Imagination</h2>
-    <div className="space-y-6">
-      <div className="mantra-box p-6 rounded-lg text-white bg-gradient-to-r from-[#23465a] to-[#1E88E5]">
-        <textarea
-          name="wildestDream"
-          placeholder="What is your wildest dream or vision for your life?"
-          className="w-full bg-transparent placeholder-white focus:outline-none h-32"
-          onChange={handleInputChange}
-          value={formData.wildestDream}
-        />
-      </div>
-      <textarea
-        name="worldToBuild"
-        placeholder="What kind of world would you like to help build with Thrive?"
-        className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#FF6B6B]"
-        onChange={handleInputChange}
-        value={formData.worldToBuild}
-      />
-    </div>
-  </section>
-)}
-
-{/* Reflection and Evolution */}
-{currentSection === 6 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#6A5ACD] mb-6 font-sans">Reflection & Evolution</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <textarea
-          name="unlearned"
-          placeholder="What is something you've unlearned recently?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-24 focus:ring-2 focus:ring-[#6A5ACD]"
-          onChange={handleInputChange}
-          value={formData.unlearned}
-        />
-        <textarea
-          name="fiveYearsAgo"
-          placeholder="Who were you five years ago, and what has changed since?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-24 focus:ring-2 focus:ring-[#6A5ACD]"
-          onChange={handleInputChange}
-          value={formData.fiveYearsAgo}
-        />
-      </div>
-      <div className="space-y-6">
-        <textarea
-          name="peaceDefinition"
-          placeholder="What does peace mean to you today?"
-          className="w-full px-4 py-3 border rounded-md shadow-sm h-24 focus:ring-2 focus:ring-[#6A5ACD]"
-          onChange={handleInputChange}
-          value={formData.peaceDefinition}
-        />
-        <div className="bg-[#EDE7F6] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Message to Future Self</h3>
-          <textarea
-            name="futureMessage"
-            placeholder="This message will be sent back to you in 6 months"
-            className="w-full px-4 py-3 border rounded-md shadow-sm h-32 focus:ring-2 focus:ring-[#6A5ACD]"
-            onChange={handleInputChange}
-            value={formData.futureMessage}
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-)}
-
-{/* Community Discovery */}
-{currentSection === 7 && (
-  <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
-    <h2 className="text-3xl font-bold text-[#008080] mb-6 font-sans">Community Discovery</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        <div className="bg-[#E0F7FA] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Collaboration Interests</h3>
-          <div className="flex flex-wrap gap-2">
-            {interests.map((interest, index) => (
-              <span key={index} className="bg-white px-4 py-2 rounded-full flex items-center">
-                {interest}
-                <button 
-                  onClick={() => removeInterest(index)}
-                  className="ml-2 text-red-500"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-            <input
-              type="text"
-              value={interestInput}
-              onChange={(e) => setInterestInput(e.target.value)}
-              onKeyDown={handleInterestAdd}
-              placeholder="Add interest"
-              className="px-4 py-2 border rounded-full"
-            />
-          </div>
-        </div>
-        <select
-          name="availableFor"
-          className="w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-[#008080]"
-          onChange={handleInputChange}
-          value={formData.availableFor}
-        >
-          <option value="">Available For</option>
-          <option value="Mentorship">Mentorship</option>
-          <option value="Volunteering">Volunteering</option>
-          <option value="Learning Circles">Learning Circles</option>
-          <option value="Projects">Projects</option>
-          <option value="Just Conversations">Just Conversations</option>
-        </select>
-      </div>
-      <div className="space-y-6">
-        <div className="bg-[#E0F7FA] p-6 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Connection Preferences</h3>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="similarSkills"
-                checked={formData.similarSkills}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#008080] focus:ring-[#008080]"
-              />
-              Similar Skills
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="complementaryStrengths"
-                checked={formData.complementaryStrengths}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#008080] focus:ring-[#008080]"
-              />
-              Complementary Strengths
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="openHearted"
-                checked={formData.openHearted}
-                onChange={handleInputChange}
-                className="w-5 h-5 rounded border-gray-300 text-[#008080] focus:ring-[#008080]"
-              />
-              Anyone Open-Hearted
-            </label>
-          </div>
-        </div>
-        </div>
-        </div>
-      </section>
-)}
-{/* Navigation Buttons */}
-<div className="flex justify-between max-w-4xl mx-auto mt-8">
-          <button
-            onClick={() => handleSectionNavigation('prev')}
-            className="bg-[#23465a] text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all font-medium"
+          <motion.button
+            onClick={() => navigateSection('prev')}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
             disabled={currentSection === 0}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-md ${
+              currentSection === 0 ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-[#23465a] text-white hover:bg-gray-800'
+            }`}
           >
-            ← Previous
-          </button>
-          
+            <ArrowLeftIcon className="w-5 h-5" />
+            Previous
+          </motion.button>
+
           {currentSection < sections.length - 1 ? (
-            <button
-              onClick={() => handleSectionNavigation('next')}
-              className="bg-[#1E88E5] text-white px-6 py-3 rounded-lg hover:bg-[#1565C0] transition-all font-medium"
+            <motion.button
+              onClick={() => navigateSection('next')}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-2 bg-[#1E88E5] text-white px-6 py-3 rounded-lg font-medium shadow-md hover:bg-[#1565C0]"
             >
-              Next →
-            </button>
+              Next
+              <ArrowRightIcon className="w-5 h-5" />
+            </motion.button>
           ) : (
-            <button
-            
-              className="bg-[#2E8B57] text-white px-6 py-3 rounded-lg hover:bg-[#3CB371] transition-all font-medium"
-            >
-              Complete Profile
-            </button>
+            <div className="flex gap-4">
+              <motion.button
+                onClick={handleResetProfile}
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center gap-2 bg-gray-500 text-white px-6 py-3 rounded-lg font-medium shadow-md hover:bg-gray-600"
+              >
+                Reset
+              </motion.button>
+              <motion.button
+                onClick={handleCompleteProfile}
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                disabled={isSubmitting}
+                className={`flex items-center gap-2 ${
+                  isSubmitting ? 'bg-gray-400' : 'bg-[#2E8B57] hover:bg-[#3CB371]'
+                } text-white px-6 py-3 rounded-lg font-medium shadow-md`}
+              >
+                {isSubmitting ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    Complete Profile
+                    <CheckCircleIcon className="w-5 h-5" />
+                  </>
+                )}
+              </motion.button>
+            </div>
           )}
-        </div>
+        </motion.div>
       </main>
     </div>
   );
 };
-// Reusable Components
-const InputField = ({ label, name, value, onChange, textarea = false }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-700">{label}</label>
-    {textarea ? (
-      <textarea
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1E88E5] h-32"
-      />
-    ) : (
-      <input
-        type="text"
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1E88E5]"
-      />
-    )}
-  </div>
-);
 
-const Checkbox = ({ label, name, checked, onChange }) => (
-  <label className="flex items-center space-x-3">
-    <input
-      type="checkbox"
-      name={name}
-      checked={checked}
-      onChange={onChange}
-      className="w-5 h-5 text-[#1E88E5] rounded focus:ring-[#1E88E5]"
-    />
-    <span className="text-gray-700">{label}</span>
-  </label>
-);
-
-const SelectField = ({ label, name, value, onChange, options }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-700">{label}</label>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1E88E5]"
-    >
-      <option value="">Select an option</option>
-      {options.map((option, index) => (
-        <option key={index} value={option}>{option}</option>
-      ))}
-    </select>
-  </div>
-);
-
-// Prop Types
 ProfileEdit.propTypes = {
-    profileData: PropTypes.shape({
-      avatar: PropTypes.string,
-      fullName: PropTypes.string,
-      location: PropTypes.string,
-      languages: PropTypes.string,
-      aboutYourself: PropTypes.string,
-      describeSelf: PropTypes.string,
-      friendDescription: PropTypes.string,
-      lifeMantra: PropTypes.string,
-      whyThrive: PropTypes.string,
-      goodLife: PropTypes.string,
-      lifeAspirations: PropTypes.string,
-      noFinancialPressure: PropTypes.string,
-      millionDollarCreation: PropTypes.string,
-      skills: PropTypes.arrayOf(PropTypes.string),
-      skillsToLearn: PropTypes.string,
-      contributions: PropTypes.arrayOf(PropTypes.string),
-      learnedSoFar: PropTypes.string,
-      hobbies: PropTypes.string,
-      feelAlive: PropTypes.string,
-      communityDrawn: PropTypes.string,
-      wildestDream: PropTypes.string,
-      worldToBuild: PropTypes.string,
-      unlearned: PropTypes.string,
-      fiveYearsAgo: PropTypes.string,
-      peaceDefinition: PropTypes.string,
-      futureMessage: PropTypes.string,
-      interests: PropTypes.arrayOf(PropTypes.string),
-      availableFor: PropTypes.string,
-      similarSkills: PropTypes.bool,
-      complementaryStrengths: PropTypes.bool,
-      openHearted: PropTypes.bool,
-    })
-  };
-  
-  ProfileEdit.defaultProps = {
-    profileData: {
-      avatar: '',
-      fullName: '',
-      location: '',
-      languages: '',
-      aboutYourself: '',
-      describeSelf: '',
-      friendDescription: '',
-      lifeMantra: '',
-      whyThrive: '',
-      goodLife: '',
-      lifeAspirations: '',
-      noFinancialPressure: '',
-      millionDollarCreation: '',
-      skills: [],
-      skillsToLearn: '',
-      contributions: [],
-      learnedSoFar: '',
-      hobbies: '',
-      feelAlive: '',
-      communityDrawn: '',
-      wildestDream: '',
-      worldToBuild: '',
-      unlearned: '',
-      fiveYearsAgo: '',
-      peaceDefinition: '',
-      futureMessage: '',
-      interests: [],
-      availableFor: '',
-      similarSkills: false,
-      complementaryStrengths: false,
-      openHearted: false,
-    }
-  };
-  
-  export default ProfileEdit;
+  profileData: PropTypes.shape({
+    avatar: PropTypes.string,
+    fullName: PropTypes.string,
+    location: PropTypes.string,
+    languages: PropTypes.string,
+    aboutYourself: PropTypes.string,
+    describeSelf: PropTypes.string,
+    friendDescription: PropTypes.string,
+    lifeMantra: PropTypes.string,
+    whyThrive: PropTypes.string,
+    goodLife: PropTypes.string,
+    lifeAspirations: PropTypes.string,
+    noFinancialPressure: PropTypes.string,
+    millionDollarCreation: PropTypes.string,
+    skills: PropTypes.arrayOf(PropTypes.string),
+    skillsToLearn: PropTypes.string,
+    contributions: PropTypes.arrayOf(PropTypes.string),
+    learnedSoFar: PropTypes.string,
+    hobbies: PropTypes.string,
+    feelAlive: PropTypes.string,
+    communityDrawn: PropTypes.string,
+    wildestDream: PropTypes.string,
+    worldToBuild: PropTypes.string,
+    unlearned: PropTypes.string,
+    fiveYearsAgo: PropTypes.string,
+    peaceDefinition: PropTypes.string,
+    futureMessage: PropTypes.string,
+    interests: PropTypes.arrayOf(PropTypes.string),
+    availableFor: PropTypes.string,
+    similarSkills: PropTypes.bool,
+    complementaryStrengths: PropTypes.bool,
+    openHearted: PropTypes.bool,
+  })
+};
+
+export default ProfileEdit;
