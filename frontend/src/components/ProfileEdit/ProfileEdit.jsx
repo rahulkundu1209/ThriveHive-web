@@ -29,6 +29,7 @@ const ProfileEdit = ({ profileData = {} }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tooltip, setTooltip] = useState({ show: false, text: '', x: 0, y: 0 });
   const [saveStatus, setSaveStatus] = useState({ message: '', isError: false });
+  const [isLoading, setIsLoading] = useState(true);
 
   const sections = [
     'foundational', 'introduction', 'purpose', 
@@ -76,43 +77,84 @@ const ProfileEdit = ({ profileData = {} }) => {
     openHearted: false,
   };
 
-  // Initialize all state from localStorage or props
-  const [formData, setFormData] = useState(() => {
-    try {
-      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedData) {
-        return {
-          ...defaultFormData,
-          ...JSON.parse(savedData),
-        };
-      }
-      return {
-        ...defaultFormData,
-        ...profileData,
-      };
-    } catch (error) {
-      console.error('Failed to initialize form data:', error);
-      return defaultFormData;
-    }
-  });
+  // Initialize all state
+  const [formData, setFormData] = useState(defaultFormData);
 
-  // Initialize skills, interests, and avatar from saved data
+  // Load profile data on mount
   useEffect(() => {
-    try {
-      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        if (parsedData.skills) setSkills(parsedData.skills);
-        if (parsedData.interests) setInterests(parsedData.interests);
-        if (parsedData.avatar) setAvatarPreview(parsedData.avatar);
-      }
-    } catch (error) {
-      console.error('Failed to initialize from localStorage:', error);
-    }
-  }, []);
+    const loadProfileData = async () => {
+      setIsLoading(true);
+      try {
+        const auth = getAuth();
+        if (!auth.currentUser) {
+          navigate('/');
+          return;
+        }
 
-  // Combined effect to handle all localStorage saves
+        // First try to load from backend
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch('http://localhost:5000/api/profile/get', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Only use localStorage if no data from backend
+          if (!data || Object.keys(data).length === 0) {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
+              const parsedData = JSON.parse(savedData);
+              setFormData(prev => ({
+                ...defaultFormData,
+                ...parsedData
+              }));
+              if (parsedData.skills) setSkills(parsedData.skills);
+              if (parsedData.interests) setInterests(parsedData.interests);
+              if (parsedData.avatar) setAvatarPreview(parsedData.avatar);
+              setIsLoading(false);
+              return;
+            }
+          }
+
+          // Set data from backend
+          setFormData(prev => ({
+            ...defaultFormData,
+            ...data
+          }));
+          if (data.skills) setSkills(data.skills);
+          if (data.interests) setInterests(data.interests);
+          if (data.avatar) setAvatarPreview(data.avatar);
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        
+        // Fallback to localStorage if backend fails
+        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setFormData(prev => ({
+            ...defaultFormData,
+            ...parsedData
+          }));
+          if (parsedData.skills) setSkills(parsedData.skills);
+          if (parsedData.interests) setInterests(parsedData.interests);
+          if (parsedData.avatar) setAvatarPreview(parsedData.avatar);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [navigate]);
+  // Save data to localStorage whenever it changes
   useEffect(() => {
+    if (isLoading) return;
+    
     const saveData = {
       ...formData,
       skills,
@@ -125,14 +167,12 @@ const ProfileEdit = ({ profileData = {} }) => {
     } catch (error) {
       console.error('Failed to save to localStorage:', error);
     }
-  }, [formData, skills, interests, avatarPreview]);
+  }, [formData, skills, interests, avatarPreview, isLoading]);
 
-  // Auth and progress tracking
+  // Update progress when section changes
   useEffect(() => {
-    const auth = getAuth();
-    if (!auth.currentUser) navigate('/');
     setProgress(((currentSection + 1) / sections.length) * 100);
-  }, [currentSection, navigate]);
+  }, [currentSection]);
 
   const showTooltip = (text, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -200,7 +240,6 @@ const ProfileEdit = ({ profileData = {} }) => {
     setList(prev => prev.filter((_, i) => i !== index));
   };
 
-
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -221,7 +260,10 @@ const ProfileEdit = ({ profileData = {} }) => {
   const handleResetProfile = () => {
     if (window.confirm('Are you sure you want to reset your profile data?')) {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-      window.location.reload();
+      setFormData(defaultFormData);
+      setSkills([]);
+      setInterests([]);
+      setAvatarPreview('');
     }
   };
 
@@ -230,13 +272,37 @@ const ProfileEdit = ({ profileData = {} }) => {
       const auth = getAuth();
       const idToken = await auth.currentUser.getIdToken();
       
+      // First fetch the existing profile data
+      const getResponse = await fetch('http://localhost:5000/api/profile/get', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      
+      if (!getResponse.ok) {
+        throw new Error('Failed to fetch existing profile');
+      }
+      
+      const existingData = await getResponse.json();
+      
+      // Merge the existing data with new changes
+      const mergedData = {
+        ...existingData,
+        ...profileData,
+        // Ensure arrays are properly merged
+        skills: profileData.skills || existingData.skills || [],
+        interests: profileData.interests || existingData.interests || []
+      };
+      
+      // Now send the merged data
       const response = await fetch('http://localhost:5000/api/profile/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(mergedData)
       });
       
       if (!response.ok) {
@@ -285,9 +351,9 @@ const ProfileEdit = ({ profileData = {} }) => {
   };
 
   const sectionComponents = [
-    <Foundation key={0} {...{ formData, handleInputChange, avatarPreview, handleAvatarUpload, showTooltip }} />,
-    <Self key={1} {...{ formData, handleInputChange, showTooltip }} />,
-    <Purpose key={2} {...{ formData, handleInputChange, showTooltip }} />,
+    <Foundation key={0} formData={formData} handleInputChange={handleInputChange} avatarPreview={avatarPreview} handleAvatarUpload={handleAvatarUpload} showTooltip={showTooltip} />,
+    <Self key={1} formData={formData} handleInputChange={handleInputChange} showTooltip={showTooltip} />,
+    <Purpose key={2} formData={formData} handleInputChange={handleInputChange} showTooltip={showTooltip} />,
     <Skills 
       key={3} 
       formData={formData} 
@@ -298,9 +364,9 @@ const ProfileEdit = ({ profileData = {} }) => {
       handleAddSkill={handleAddSkill} 
       handleRemoveSkill={handleRemoveSkill} 
     />,
-    <Life key={4} {...{ formData, handleInputChange }} />,
-    <Dreams key={5} {...{ formData, handleInputChange }} />,
-    <Reflection key={6} {...{ formData, handleInputChange }} />,
+    <Life key={4} formData={formData} handleInputChange={handleInputChange} />,
+    <Dreams key={5} formData={formData} handleInputChange={handleInputChange} />,
+    <Reflection key={6} formData={formData} handleInputChange={handleInputChange} />,
     <Community 
       key={7} 
       formData={formData} 
@@ -313,6 +379,14 @@ const ProfileEdit = ({ profileData = {} }) => {
       handleRemoveInterest={handleRemoveInterest} 
     />
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -327,7 +401,7 @@ const ProfileEdit = ({ profileData = {} }) => {
         </motion.div>
       )}
 
-      <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200 z-2">
+      <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200 z-10">
         <motion.div 
           className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
           animate={{ width: `${progress}%` }}
@@ -345,7 +419,7 @@ const ProfileEdit = ({ profileData = {} }) => {
 
       <main className="container mx-auto pt-6 px-4 pb-16">
         <div className="flex justify-center space-x-2 mb-8 overflow-x-auto py-1">
-          {sections.map((_, index) => (
+          {sections.map((section, index) => (
             <motion.button
               key={index}
               onClick={() => setCurrentSection(index)}
