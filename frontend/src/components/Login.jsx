@@ -95,11 +95,11 @@ const Login = () => {
   };
 
   return (
-    <div className="relative z-50">
+    <div>
       {signedIn ? (
-        <div className="flex items-center space-x-2">
+        <div>
           <div
-            onClick={() => setShowProfile(true)}
+            onClick={() => setShowProfile(!showProfile)}
             className="cursor-pointer z-50"
           >
             {userPhoto ? (
@@ -114,38 +114,30 @@ const Login = () => {
             )}
           </div>
 
-          {/* Modal */}
-          {showProfile && (
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-start justify-end p-4 z-40">
-              <div
-                ref={modalRef}
-                className="w-64 mt-14 bg-white text-black rounded-xl shadow-2xl border border-gray-200 animate-fade-in"
-              >
-                <div className="px-4 py-3 border-b border-gray-300">
-                  <p className="font-semibold text-lg">Hello, {userName}! 🌝</p>
-                  {isAdmin && (
-                    <p className="text-sm text-blue-500 mt-1">
-                      You have admin access!
-                    </p>
-                  )}
-                </div>
-                <div className="px-4 py-2 border-b border-gray-300 hover:bg-gray-100 transition cursor-pointer">
-                  <a href="/profile" className="block w-full">
-                    Your Profile
-                  </a>
-                </div>
-                <div className="px-4 py-2">
-                  <button
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
-                    onClick={handleSignOut}
-                  >
-                    Sign Out
-                    <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
+          <div className={`absolute lg:${showProfile ? 'inline' : 'hidden'} lg:right-0 right-0 mt-2 w-60 lg:bg-white lg:text-black rounded-lg lg:shadow-lg lg:p-2 p-0`}>
+            <div className="px-4 py-3 border-b border-gray-300">
+              <p className="font-semibold drop-shadow-[0_0_4px_rgba(255,255,255,0.5)] text-lg">Hello, {userName}! 🌝</p>
+              {isAdmin && (
+                <p className="text-sm text-blue-500 mt-1">
+                  You have admin access!
+                </p>
+              )}
             </div>
-          )}
+            <div className="px-4 py-2 border-b border-gray-300 hover:bg-gray-100 transition cursor-pointer">
+              <a href="/profile" className="block w-full">
+                Your Profile
+              </a>
+            </div>
+            <div className="px-4 py-2">
+              <button
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                onClick={handleSignOut}
+              >
+                Sign Out
+                <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <button

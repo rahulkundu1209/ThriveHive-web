@@ -31,7 +31,8 @@ function App() {
           <Route path="/profile" element={<ProfileDisplay />} />
           <Route path="/worksheet" element={<Worksheet />} />
           {(signedIn && isAdmin) && <Route path="/view-worksheet-submissions" element={<ViewWorksheetSubmissions />} />}
-          {(signedIn && isAdmin) && <Route path="/admin-dashboard" element={<AdminDashboard />} />}
+          {/* Comment should be removed after the Admin Dashboard development is complete
+            {(signedIn && isAdmin) && <Route path="/admin-dashboard" element={<AdminDashboard />} />} */}
           {signedIn && <Route path="/worksheet-submissions" element={<Submissions />} />}
         </Routes>
       </Router>
