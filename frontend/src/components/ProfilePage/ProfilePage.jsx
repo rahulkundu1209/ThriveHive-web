@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add onAuthStateChanged
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAuthContext } from "../../App";
 
 const LOCAL_STORAGE_KEY = 'profileFormData';
@@ -14,12 +14,11 @@ const ProfileDisplay = () => {
   const auth = getAuth();
 
   // Get default profile data structure
-  const getDefaultProfileData = (name, photo) => ({
-    fullName: name || 'Not available',
+  const getDefaultProfileData = () => ({
+    fullName: userName || 'Not available',
     location: 'Not available',
     languages: 'Not available',
-    avatar: photo || '', // Use the passed photo URL
-    // ... rest of the fields remain the same
+    avatar: userPhoto || '',
     aboutYourself: 'Not available',
     describeSelf: 'Not available',
     friendDescription: 'Not available',
@@ -66,12 +65,13 @@ const ProfileDisplay = () => {
           'Authorization': `Bearer ${idToken}`
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch profile');
       }
-      
-      return await response.json();
+
+      const result = await response.json();
+      return result.data;
     } catch (error) {
       console.error('Error fetching profile:', error);
       throw error;
@@ -96,37 +96,31 @@ const ProfileDisplay = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Try to get from backend first
         try {
           const backendData = await fetchProfileFromBackend();
-          if (backendData && !backendData.error) {
-            // Merge backend data with current photo
-            setProfileData({
-              ...getDefaultProfileData(userName, userPhoto),
-              ...backendData,
-              avatar: backendData.avatar || userPhoto // Prefer backend avatar, fallback to Firebase photo
-            });
+          if (backendData) {
+            setProfileData(backendData);
             setLoading(false);
             return;
           }
         } catch (backendError) {
           console.log('Falling back to local storage due to:', backendError);
         }
-        
+
         // Fallback to localStorage if backend fails
         const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           setProfileData({
-            ...getDefaultProfileData(userName, userPhoto),
-            ...parsedData,
-            avatar: parsedData.avatar || userPhoto // Prefer saved avatar, fallback to Firebase photo
+            ...getDefaultProfileData(),
+            ...parsedData
           });
         } else {
-          setProfileData(getDefaultProfileData(userName, userPhoto));
+          setProfileData(getDefaultProfileData());
         }
-        
+
         setLoading(false);
       } catch (error) {
         console.error('Error loading profile data:', error);
@@ -135,15 +129,13 @@ const ProfileDisplay = () => {
       }
     };
 
-    // Only try to load if we have an authenticated user
     if (auth.currentUser) {
       loadProfileData();
     } else {
       setError('Please sign in to view your profile');
       setLoading(false);
     }
-  }, [userName, auth, userPhoto]); // Add userPhoto to dependencies
-
+  }, [userName, auth, userPhoto]);
 
   // Helper function to get value or "Not available"
   const getValue = (value, defaultValue = 'Not available') => {
@@ -155,20 +147,24 @@ const ProfileDisplay = () => {
 
   // Format contributions array from checkboxes
   const formatContributions = () => {
+    if (!profileData) return ['Not available'];
+    
     const contributions = [];
-    if (profileData?.mentoring) contributions.push('Mentoring');
-    if (profileData?.localCircles) contributions.push('Local Circles');
-    if (profileData?.creativity) contributions.push('Creativity');
-    if (profileData?.time) contributions.push('Time');
+    if (profileData.mentoring) contributions.push('Mentoring');
+    if (profileData.localCircles) contributions.push('Local Circles');
+    if (profileData.creativity) contributions.push('Creativity');
+    if (profileData.time) contributions.push('Time');
     return contributions.length > 0 ? contributions : ['Not available'];
   };
 
   // Format connection preferences
   const formatConnectionPreferences = () => {
+    if (!profileData) return ['Not specified'];
+    
     const prefs = [];
-    if (profileData?.similarSkills) prefs.push('Similar Skills');
-    if (profileData?.complementaryStrengths) prefs.push('Complementary Strengths');
-    if (profileData?.openHearted) prefs.push('Open Hearted');
+    if (profileData.similarSkills) prefs.push('Similar Skills');
+    if (profileData.complementaryStrengths) prefs.push('Complementary Strengths');
+    if (profileData.openHearted) prefs.push('Open Hearted');
     return prefs.length > 0 ? prefs : ['Not specified'];
   };
 
@@ -205,6 +201,24 @@ const ProfileDisplay = () => {
       </div>
     );
   }
+
+  if (!profileData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-md text-center">
+          <h2 className="text-xl font-bold text-gray-700 mb-4">No Profile Found</h2>
+          <p className="text-gray-600 mb-4">You haven't created a profile yet.</p>
+          <Link 
+            to="/edit" 
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block"
+          >
+            Create Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="pt-10 pb-16 px-4 sm:px-6 lg:px-8">
@@ -278,8 +292,14 @@ const ProfileDisplay = () => {
                 <p className="text-gray-700 text-base leading-relaxed mb-6">
                   {getValue(profileData.aboutYourself)}
                 </p>
-                <DetailItem label="Describe yourself in 3 words" value={getValue(profileData.describeSelf)} />
-                <DetailItem label="How would a friend describe you?" value={getValue(profileData.friendDescription)} />
+                <DetailItem 
+                  label="Describe yourself in 3 words" 
+                  value={getValue(profileData.describeSelf)} 
+                />
+                <DetailItem 
+                  label="How would a friend describe you?" 
+                  value={getValue(profileData.friendDescription)} 
+                />
                 <div className="bg-yellow-100/60 p-5 rounded-xl">
                   <DetailItem 
                     label="✨ Life Mantra" 
@@ -290,44 +310,101 @@ const ProfileDisplay = () => {
               </SectionCard>
   
               <SectionCard title="🌱 Purpose & Vision">
-                <DetailItem label="Why do you want to thrive?" value={getValue(profileData.whyThrive)} />
-                <DetailItem label="What does a 'good life' mean to you?" value={getValue(profileData.goodLife)} />
-                <DetailItem label="Current life aspirations" value={getValue(profileData.lifeAspirations)} />
+                <DetailItem 
+                  label="Why do you want to thrive?" 
+                  value={getValue(profileData.whyThrive)} 
+                />
+                <DetailItem 
+                  label="What does a 'good life' mean to you?" 
+                  value={getValue(profileData.goodLife)} 
+                />
+                <DetailItem 
+                  label="Current life aspirations" 
+                  value={getValue(profileData.lifeAspirations)} 
+                />
               </SectionCard>
   
               <SectionCard title="💭 Dreams & Imagination">
-                <DetailItem label="What would you do with no financial pressure?" value={getValue(profileData.noFinancialPressure)} />
-                <DetailItem label="What would you create with $1 million?" value={getValue(profileData.millionDollarCreation)} />
-                <DetailItem label="Your wildest dream" value={getValue(profileData.wildestDream)} />
-                <DetailItem label="The world you want to build" value={getValue(profileData.worldToBuild)} />
+                <DetailItem 
+                  label="What would you do with no financial pressure?" 
+                  value={getValue(profileData.noFinancialPressure)} 
+                />
+                <DetailItem 
+                  label="What would you create with $1 million?" 
+                  value={getValue(profileData.millionDollarCreation)} 
+                />
+                <DetailItem 
+                  label="Your wildest dream" 
+                  value={getValue(profileData.wildestDream)} 
+                />
+                <DetailItem 
+                  label="The world you want to build" 
+                  value={getValue(profileData.worldToBuild)} 
+                />
               </SectionCard>
             </div>
   
             {/* Right Column */}
             <div className="space-y-10">
               <SectionCard title="🛠 Skills & Growth">
-                <TagList items={getValue(profileData.skills, []).length > 0 ? profileData.skills : ['Not available']} color="blue" />
-                <DetailItem label="Skills you want to learn" value={getValue(profileData.skillsToLearn)} />
-                <DetailItem label="What have you learned so far?" value={getValue(profileData.learnedSoFar)} />
+                <TagList 
+                  items={getValue(profileData.skills, [])} 
+                  color="blue" 
+                />
+                <DetailItem 
+                  label="Skills you want to learn" 
+                  value={getValue(profileData.skillsToLearn)} 
+                />
+                <DetailItem 
+                  label="What have you learned so far?" 
+                  value={getValue(profileData.learnedSoFar)} 
+                />
               </SectionCard>
   
               <SectionCard title="🤝 Contributions">
                 <TagList items={formatContributions()} color="green" />
-                <DetailItem label="What are you available for?" value={getValue(profileData.availableFor)} />
-                <DetailItem label="Connection preferences" value={formatConnectionPreferences().join(', ')} />
+                <DetailItem 
+                  label="What are you available for?" 
+                  value={getValue(profileData.availableFor)} 
+                />
+                <DetailItem 
+                  label="Connection preferences" 
+                  value={formatConnectionPreferences().join(', ')} 
+                />
               </SectionCard>
   
               <SectionCard title="🌍 Life & Community">
-                <DetailItem label="Hobbies & interests" value={getValue(profileData.hobbies)} />
-                <DetailItem label="What makes you feel alive?" value={getValue(profileData.feelAlive)} />
-                <DetailItem label="What communities are you drawn to?" value={getValue(profileData.communityDrawn)} />
-                <TagList items={getValue(profileData.interests, []).length > 0 ? profileData.interests : ['Not available']} color="indigo" />
+                <DetailItem 
+                  label="Hobbies & interests" 
+                  value={getValue(profileData.hobbies)} 
+                />
+                <DetailItem 
+                  label="What makes you feel alive?" 
+                  value={getValue(profileData.feelAlive)} 
+                />
+                <DetailItem 
+                  label="What communities are you drawn to?" 
+                  value={getValue(profileData.communityDrawn)} 
+                />
+                <TagList 
+                  items={getValue(profileData.interests, [])} 
+                  color="indigo" 
+                />
               </SectionCard>
   
               <SectionCard title="🧠 Reflections & Growth">
-                <DetailItem label="What have you recently unlearned?" value={getValue(profileData.unlearned)} />
-                <DetailItem label="Where were you five years ago?" value={getValue(profileData.fiveYearsAgo)} />
-                <DetailItem label="What does peace mean to you?" value={getValue(profileData.peaceDefinition)} />
+                <DetailItem 
+                  label="What have you recently unlearned?" 
+                  value={getValue(profileData.unlearned)} 
+                />
+                <DetailItem 
+                  label="Where were you five years ago?" 
+                  value={getValue(profileData.fiveYearsAgo)} 
+                />
+                <DetailItem 
+                  label="What does peace mean to you?" 
+                  value={getValue(profileData.peaceDefinition)} 
+                />
                 <div className="bg-purple-100/60 p-5 rounded-xl">      
                   <DetailItem 
                     label="📩 Message to your future self" 

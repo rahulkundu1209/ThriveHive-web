@@ -91,7 +91,6 @@ const ProfileEdit = ({ profileData = {} }) => {
           return;
         }
 
-        // First try to load from backend
         const idToken = await auth.currentUser.getIdToken();
         const response = await fetch('http://localhost:5000/api/profile/get', {
           method: 'GET',
@@ -101,10 +100,19 @@ const ProfileEdit = ({ profileData = {} }) => {
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const { data } = await response.json();
           
-          // Only use localStorage if no data from backend
-          if (!data || Object.keys(data).length === 0) {
+          if (data) {
+            // If profile exists in backend, use that data
+            setFormData(prev => ({
+              ...defaultFormData,
+              ...data
+            }));
+            if (data.skills) setSkills(data.skills);
+            if (data.interests) setInterests(data.interests);
+            if (data.avatar) setAvatarPreview(data.avatar);
+          } else {
+            // No profile exists, check localStorage for draft
             const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (savedData) {
               const parsedData = JSON.parse(savedData);
@@ -115,23 +123,11 @@ const ProfileEdit = ({ profileData = {} }) => {
               if (parsedData.skills) setSkills(parsedData.skills);
               if (parsedData.interests) setInterests(parsedData.interests);
               if (parsedData.avatar) setAvatarPreview(parsedData.avatar);
-              setIsLoading(false);
-              return;
             }
           }
-
-          // Set data from backend
-          setFormData(prev => ({
-            ...defaultFormData,
-            ...data
-          }));
-          if (data.skills) setSkills(data.skills);
-          if (data.interests) setInterests(data.interests);
-          if (data.avatar) setAvatarPreview(data.avatar);
         }
       } catch (error) {
         console.error('Failed to load profile:', error);
-        
         // Fallback to localStorage if backend fails
         const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedData) {
@@ -151,6 +147,7 @@ const ProfileEdit = ({ profileData = {} }) => {
 
     loadProfileData();
   }, [navigate]);
+
   // Save data to localStorage whenever it changes
   useEffect(() => {
     if (isLoading) return;
@@ -272,37 +269,13 @@ const ProfileEdit = ({ profileData = {} }) => {
       const auth = getAuth();
       const idToken = await auth.currentUser.getIdToken();
       
-      // First fetch the existing profile data
-      const getResponse = await fetch('http://localhost:5000/api/profile/get', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${idToken}`
-        }
-      });
-      
-      if (!getResponse.ok) {
-        throw new Error('Failed to fetch existing profile');
-      }
-      
-      const existingData = await getResponse.json();
-      
-      // Merge the existing data with new changes
-      const mergedData = {
-        ...existingData,
-        ...profileData,
-        // Ensure arrays are properly merged
-        skills: profileData.skills || existingData.skills || [],
-        interests: profileData.interests || existingData.interests || []
-      };
-      
-      // Now send the merged data
       const response = await fetch('http://localhost:5000/api/profile/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify(mergedData)
+        body: JSON.stringify(profileData)
       });
       
       if (!response.ok) {
@@ -333,19 +306,28 @@ const ProfileEdit = ({ profileData = {} }) => {
       const response = await saveProfileToBackend(profileToSave);
       
       if (response.success) {
-        setSaveStatus({ message: 'Profile saved successfully!', isError: false });
+        setSaveStatus({ 
+          message: response.message || 'Profile saved successfully!', 
+          isError: false 
+        });
         // Clear local storage after successful save
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         
         // Navigate after a short delay
         setTimeout(() => navigate("/profile"), 1500);
       } else {
-        setSaveStatus({ message: 'Failed to save profile. Please try again.', isError: true });
+        setSaveStatus({ 
+          message: response.error || 'Failed to save profile. Please try again.', 
+          isError: true 
+        });
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      setSaveStatus({ message: 'An error occurred while saving your profile.', isError: true });
+      setSaveStatus({ 
+        message: error.message || 'An error occurred while saving your profile.', 
+        isError: true 
+      });
       setIsSubmitting(false);
     }
   };

@@ -1,37 +1,8 @@
 import express from 'express';
-import profileController from '../controllers/profileController.js';
-import admin from 'firebase-admin';
+import { verifyFirebaseToken } from '../middleware/authMiddleware.js';
+import * as profileController from '../controllers/profileController.js';
 
 const router = express.Router();
-
-// Initialize Firebase Admin
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-}
-
-// Middleware to verify Firebase token
-const verifyFirebaseToken = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized - No token provided' });
-    }
-
-    const idToken = authHeader.split(' ')[1];
-
-    try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        req.user = decodedToken;
-        next();
-    } catch (error) {
-        console.error('Error verifying token:', error);
-        return res.status(401).json({ error: 'Unauthorized - Invalid token' });
-    }
-};
 
 /**
  * @route POST /api/profile/save
